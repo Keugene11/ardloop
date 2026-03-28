@@ -117,6 +117,43 @@ export function PostCard({
               </Link>
             )}
           </div>
+
+          {post.recent_comments?.length > 0 && (
+            <div className="mt-2.5 pl-1 border-l-2 border-border ml-1">
+              {post.recent_comments.map((comment) => (
+                <div key={comment.id} className="flex gap-2 py-1.5 pl-2.5">
+                  {comment.author.avatar_url ? (
+                    <Image
+                      src={comment.author.avatar_url}
+                      alt={comment.author.full_name}
+                      width={20}
+                      height={20}
+                      className="rounded-full shrink-0 mt-0.5"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[8px] font-semibold text-text-muted shrink-0 mt-0.5">
+                      {comment.author.full_name?.[0] || "?"}
+                    </div>
+                  )}
+                  <p className="text-[13px] leading-snug min-w-0">
+                    <span className="font-semibold">
+                      {comment.author.full_name}
+                    </span>{" "}
+                    <span className="text-text-muted">
+                      {comment.content.length > 100
+                        ? comment.content.slice(0, 100) + "..."
+                        : comment.content}
+                    </span>
+                  </p>
+                </div>
+              ))}
+              {post.comment_count > 2 && (
+                <p className="text-[12px] text-text-muted pl-2.5 pt-0.5">
+                  View all {post.comment_count} comments
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </article>
     </Link>

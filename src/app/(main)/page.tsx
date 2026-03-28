@@ -22,6 +22,28 @@ export default async function HomePage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
+  const postIds = (posts || []).map((p) => p.id);
+
+  // Fetch recent comments for all posts in one query
+  const { data: recentComments } = postIds.length
+    ? await supabase
+        .from("comments")
+        .select("*, author:profiles(*)")
+        .in("post_id", postIds)
+        .order("created_at", { ascending: false })
+        .limit(200)
+    : { data: [] };
+
+  // Group comments by post_id, keep latest 2 per post
+  const commentsByPost = new Map<string, typeof recentComments>();
+  (recentComments || []).forEach((c) => {
+    const existing = commentsByPost.get(c.post_id) || [];
+    if (existing.length < 2) {
+      existing.push(c);
+      commentsByPost.set(c.post_id, existing);
+    }
+  });
+
   let likedPostIds: Set<string> = new Set();
   if (user) {
     const { data: likes } = await supabase
@@ -36,6 +58,7 @@ export default async function HomePage() {
     like_count: post.like_count?.[0]?.count || 0,
     comment_count: post.comment_count?.[0]?.count || 0,
     user_has_liked: likedPostIds.has(post.id),
+    recent_comments: (commentsByPost.get(post.id) || []).reverse(),
   }));
 
   return (

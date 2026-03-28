@@ -22,6 +22,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   user_has_liked: boolean;
+  recent_comments: Comment[];
 }
 
 export type PostCategory =
