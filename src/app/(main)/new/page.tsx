@@ -3,13 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { categories } from "@/lib/categories";
-import type { PostCategory } from "@/types";
 
 export default function NewPostPage() {
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState<PostCategory>("general");
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +27,6 @@ export default function NewPostPage() {
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
       content: content.trim(),
-      category,
       price: priceValue,
     });
 
@@ -54,28 +50,6 @@ export default function NewPostPage() {
             className="w-full bg-transparent text-[15px] placeholder:text-text-muted/50 outline-none resize-none min-h-[120px]"
             autoFocus
           />
-        </div>
-
-        <div className="mb-6">
-          <label className="text-[12px] font-semibold uppercase tracking-wide text-text-muted mb-2 block">
-            Category
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setCategory(cat.value)}
-                className={`text-[12px] font-semibold px-3.5 py-1.5 rounded-full press transition-colors ${
-                  category === cat.value
-                    ? "bg-[#1a1a1a] text-white"
-                    : "bg-bg-card border border-border text-text-muted"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="mb-6">

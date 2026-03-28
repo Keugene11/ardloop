@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, MessageCircle, Send, DollarSign } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { getCategoryLabel } from "@/lib/categories";
 import type { Post } from "@/types";
 import { timeAgo } from "@/lib/utils";
 
@@ -66,9 +65,6 @@ export function PostCard({
               {timeAgo(post.created_at)}
             </p>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted bg-bg-input px-2.5 py-1 rounded-full">
-            {getCategoryLabel(post.category)}
-          </span>
         </div>
 
         <p className="text-[14px] leading-relaxed mb-3 whitespace-pre-wrap">

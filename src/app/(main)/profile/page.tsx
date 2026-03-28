@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { ProfileActions } from "@/components/profile-actions";
 import { timeAgo } from "@/lib/utils";
-import { getCategoryLabel } from "@/lib/categories";
 import Link from "next/link";
 
 export default async function ProfilePage() {
@@ -92,10 +91,7 @@ export default async function ProfilePage() {
                 href={`/post/${post.id}`}
                 className="block bg-bg-card border border-border rounded-xl px-4 py-3 hover:bg-bg-card-hover transition-colors press"
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-                    {getCategoryLabel(post.category)}
-                  </span>
+                <div className="flex items-center justify-end mb-1">
                   <span className="text-[11px] text-text-muted">
                     {timeAgo(post.created_at)}
                   </span>

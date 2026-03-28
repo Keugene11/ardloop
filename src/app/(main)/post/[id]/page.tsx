@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, DollarSign } from "lucide-react";
-import { getCategoryLabel } from "@/lib/categories";
 import { timeAgo } from "@/lib/utils";
 import { CommentSection } from "@/components/comment-section";
 import { BuyButton } from "@/components/buy-button";
@@ -81,9 +80,6 @@ export default async function PostPage({
               {timeAgo(post.created_at)}
             </p>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted bg-bg-input px-2.5 py-1 rounded-full">
-            {getCategoryLabel(post.category)}
-          </span>
         </div>
 
         <p className="text-[15px] leading-relaxed whitespace-pre-wrap">

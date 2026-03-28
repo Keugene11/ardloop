@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
-import type { Post, PostCategory } from "@/types";
+import type { Post } from "@/types";
 import { PostCard } from "./post-card";
-import { categories } from "@/lib/categories";
 
 export function Feed({
   initialPosts,
@@ -13,19 +12,15 @@ export function Feed({
   initialPosts: Post[];
   userId: string | null;
 }) {
-  const [activeCategory, setActiveCategory] = useState<PostCategory | "all">(
-    "all"
-  );
   const [search, setSearch] = useState("");
 
   const filtered = initialPosts.filter((p) => {
-    const matchesCategory =
-      activeCategory === "all" || p.category === activeCategory;
-    const matchesSearch =
-      !search ||
-      p.content.toLowerCase().includes(search.toLowerCase()) ||
-      p.author.full_name.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      p.content.toLowerCase().includes(q) ||
+      p.author.full_name.toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -43,32 +38,6 @@ export function Feed({
           placeholder="Search posts..."
           className="w-full bg-bg-card border border-border rounded-full pl-9 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
         />
-      </div>
-
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-1 px-1">
-        <button
-          onClick={() => setActiveCategory("all")}
-          className={`shrink-0 text-[12px] font-semibold px-3.5 py-1.5 rounded-full press transition-colors ${
-            activeCategory === "all"
-              ? "bg-[#1a1a1a] text-white"
-              : "bg-bg-card border border-border text-text-muted"
-          }`}
-        >
-          All
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.value}
-            onClick={() => setActiveCategory(cat.value)}
-            className={`shrink-0 text-[12px] font-semibold px-3.5 py-1.5 rounded-full press transition-colors ${
-              activeCategory === cat.value
-                ? "bg-[#1a1a1a] text-white"
-                : "bg-bg-card border border-border text-text-muted"
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
       </div>
 
       <div className="space-y-3 stagger">
