@@ -82,49 +82,56 @@ export function ProfileActions({
         )}
       </div>
 
-      {/* Bio & Sign Out */}
-      <div className="flex gap-2">
-        {editing ? (
-          <div className="flex-1 flex gap-2">
-            <input
-              value={bioValue}
-              onChange={(e) => setBioValue(e.target.value)}
-              placeholder="Add a bio..."
-              className="flex-1 bg-bg-card border border-border rounded-full pl-4 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
-            />
+      {/* Bio */}
+      {editing ? (
+        <div className="bg-bg-card border border-border rounded-2xl px-4 py-4">
+          <label className="text-[12px] font-semibold uppercase tracking-wide text-text-muted mb-2 block">
+            About You
+          </label>
+          <textarea
+            value={bioValue}
+            onChange={(e) => setBioValue(e.target.value)}
+            placeholder={"Tell Ardsley about yourself...\n\nE.g. I offer math & science tutoring for grades 6-12. 3 years of experience. $30/hr."}
+            className="w-full bg-transparent text-[14px] placeholder:text-text-muted/50 outline-none resize-none min-h-[120px] mb-3"
+            autoFocus
+          />
+          <div className="flex gap-2">
             <button
               onClick={handleSaveBio}
               disabled={saving}
-              className="bg-[#1a1a1a] text-white px-4 py-2.5 rounded-xl font-semibold text-[13px] press"
+              className="bg-[#1a1a1a] text-white px-5 py-2.5 rounded-xl font-semibold text-[13px] press"
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </button>
             <button
-              onClick={() => setEditing(false)}
+              onClick={() => {
+                setEditing(false);
+                setBioValue(bio);
+              }}
               className="border border-border px-4 py-2.5 rounded-xl text-[13px] press"
             >
               Cancel
             </button>
           </div>
-        ) : (
-          <>
-            <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-2 border border-border rounded-xl px-4 py-2.5 text-[13px] font-semibold press"
-            >
-              <Pencil size={14} strokeWidth={1.5} />
-              Edit Bio
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 border border-border rounded-xl px-4 py-2.5 text-[13px] font-semibold text-red-500 press ml-auto"
-            >
-              <LogOut size={14} strokeWidth={1.5} />
-              Sign Out
-            </button>
-          </>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditing(true)}
+            className="flex items-center gap-2 border border-border rounded-xl px-4 py-2.5 text-[13px] font-semibold press"
+          >
+            <Pencil size={14} strokeWidth={1.5} />
+            {bio ? "Edit Bio" : "Add Bio"}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 border border-border rounded-xl px-4 py-2.5 text-[13px] font-semibold text-red-500 press ml-auto"
+          >
+            <LogOut size={14} strokeWidth={1.5} />
+            Sign Out
+          </button>
+        </div>
+      )}
     </div>
   );
 }

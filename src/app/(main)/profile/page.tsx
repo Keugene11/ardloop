@@ -57,7 +57,7 @@ export default async function ProfilePage() {
         </div>
 
         {profile?.bio && (
-          <p className="text-[14px] text-text-muted mb-4">{profile.bio}</p>
+          <p className="text-[14px] text-text-muted mb-4 whitespace-pre-wrap">{profile.bio}</p>
         )}
 
         <div className="flex gap-6 text-center">
