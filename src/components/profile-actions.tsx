@@ -4,28 +4,32 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut, Pencil, CreditCard, CheckCircle, Camera } from "lucide-react";
+import { LogOut, CreditCard, CheckCircle, Camera, Check, X } from "lucide-react";
 
 export function ProfileActions({
   userId,
   fullName,
   avatarUrl,
+  email,
   bio,
   stripeOnboarded,
 }: {
   userId: string;
   fullName: string;
   avatarUrl: string | null;
+  email: string;
   bio: string;
   stripeOnboarded: boolean;
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [editing, setEditing] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [editingBio, setEditingBio] = useState(false);
   const [nameValue, setNameValue] = useState(fullName);
   const [bioValue, setBioValue] = useState(bio);
-  const [saving, setSaving] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [savingBio, setSavingBio] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
   const [connectingStripe, setConnectingStripe] = useState(false);
@@ -37,34 +41,36 @@ export function ProfileActions({
     router.refresh();
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleSaveName = async () => {
+    if (!nameValue.trim() || nameValue.trim() === fullName) {
+      setEditingName(false);
+      setNameValue(fullName);
+      return;
+    }
+    setSavingName(true);
+    const res = await fetch("/api/profile/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name: nameValue.trim() }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Failed to update name");
+    }
+    setSavingName(false);
+    setEditingName(false);
+    router.refresh();
+  };
+
+  const handleSaveBio = async () => {
+    setSavingBio(true);
     const supabase = createClient();
-
-    const updates: Record<string, string> = {};
-    if (nameValue.trim() !== fullName) {
-      const res = await fetch("/api/profile/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name: nameValue.trim() }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Failed to update name");
-        setSaving(false);
-        return;
-      }
-    }
-
-    if (bioValue.trim() !== bio) {
-      await supabase
-        .from("profiles")
-        .update({ bio: bioValue.trim() })
-        .eq("id", userId);
-    }
-
-    setEditing(false);
-    setSaving(false);
+    await supabase
+      .from("profiles")
+      .update({ bio: bioValue.trim() })
+      .eq("id", userId);
+    setSavingBio(false);
+    setEditingBio(false);
     router.refresh();
   };
 
@@ -72,24 +78,20 @@ export function ProfileActions({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Client-side validation
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       alert("Only JPEG, PNG, and WebP images are allowed");
       return;
     }
-
     if (file.size < 10 * 1024) {
       alert("Image is too small. Minimum size is 10KB — use a higher quality photo.");
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       alert("Image is too large. Maximum size is 5MB.");
       return;
     }
 
     setUploadingAvatar(true);
-
     const formData = new FormData();
     formData.append("file", file);
 
@@ -97,7 +99,6 @@ export function ProfileActions({
       method: "POST",
       body: formData,
     });
-
     const data = await res.json();
 
     if (res.ok) {
@@ -106,15 +107,12 @@ export function ProfileActions({
     } else {
       alert(data.error || "Failed to upload");
     }
-
     setUploadingAvatar(false);
-    // Reset the input so the same file can be selected again
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
-    <div className="space-y-3">
-      {/* Avatar upload */}
+    <div>
       <input
         ref={fileInputRef}
         type="file"
@@ -123,112 +121,108 @@ export function ProfileActions({
         className="hidden"
       />
 
-      {/* Stripe Connect */}
-      {stripeOnboarded ? (
-        <div className="flex items-center gap-2 text-green-600 text-[13px]">
-          <CheckCircle size={15} strokeWidth={2} />
-          <span>Payments enabled</span>
-        </div>
-      ) : (
+      {/* Avatar + Name + Email */}
+      <div className="flex items-center gap-4 mb-5">
         <button
-          onClick={() => {
-            setConnectingStripe(true);
-            fetch("/api/connect/onboard", { method: "POST" })
-              .then((r) => r.json())
-              .then((data) => {
-                if (data.url) window.location.href = data.url;
-                else {
-                  alert("Failed to start Stripe setup");
-                  setConnectingStripe(false);
-                }
-              });
-          }}
-          disabled={connectingStripe}
-          className="flex items-center gap-2 text-[13px] text-text-muted press disabled:opacity-40"
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+          className="relative group press shrink-0"
         >
-          <CreditCard size={15} strokeWidth={1.5} />
-          {connectingStripe
-            ? "Connecting..."
-            : "Set up payments to sell services"}
+          {avatarPreview ? (
+            <div className="w-16 h-16 rounded-full overflow-hidden">
+              <Image
+                src={avatarPreview}
+                alt="Avatar"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-bg-input flex items-center justify-center text-[22px] font-semibold text-text-muted">
+              {nameValue?.[0] || "?"}
+            </div>
+          )}
+          <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Camera size={18} className="text-white" />
+          </div>
+          {uploadingAvatar && (
+            <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </button>
-      )}
 
-      {/* Edit mode */}
-      {editing ? (
-        <div className="space-y-4">
-          {/* Avatar picker */}
-          <div className="flex items-center gap-4">
+        <div className="flex-1 min-w-0">
+          {editingName ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                maxLength={50}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveName();
+                  if (e.key === "Escape") {
+                    setEditingName(false);
+                    setNameValue(fullName);
+                  }
+                }}
+                className="text-[20px] font-bold tracking-tight bg-transparent outline-none border-b border-text w-full"
+              />
+              <button
+                onClick={handleSaveName}
+                disabled={savingName}
+                className="p-1 press text-text-muted"
+              >
+                <Check size={18} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => {
+                  setEditingName(false);
+                  setNameValue(fullName);
+                }}
+                className="p-1 press text-text-muted"
+              >
+                <X size={18} strokeWidth={2} />
+              </button>
+            </div>
+          ) : (
             <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingAvatar}
-              className="relative group press"
+              onClick={() => setEditingName(true)}
+              className="text-left press"
             >
-              {avatarPreview ? (
-                <Image
-                  src={avatarPreview}
-                  alt="Avatar"
-                  width={56}
-                  height={56}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-bg-input flex items-center justify-center text-[20px] font-semibold text-text-muted">
-                  {nameValue?.[0] || "?"}
-                </div>
-              )}
-              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera size={18} className="text-white" />
-              </div>
-              {uploadingAvatar && (
-                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
+              <h1 className="text-[20px] font-bold tracking-tight">
+                {fullName}
+              </h1>
             </button>
-            <span className="text-[12px] text-text-muted">
-              Tap to change photo
-            </span>
-          </div>
+          )}
+          <p className="text-[13px] text-text-muted">{email}</p>
+        </div>
+      </div>
 
-          {/* Name */}
-          <div>
-            <label className="text-[12px] font-medium text-text-muted mb-1 block">
-              Name
-            </label>
-            <input
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
-              maxLength={50}
-              className="w-full bg-bg-input rounded-xl px-3.5 py-2.5 text-[14px] outline-none focus:ring-1 focus:ring-text-muted/30 transition-all"
-            />
-          </div>
-
-          {/* Bio */}
-          <div>
-            <label className="text-[12px] font-medium text-text-muted mb-1 block">
-              Bio
-            </label>
-            <textarea
-              value={bioValue}
-              onChange={(e) => setBioValue(e.target.value)}
-              placeholder="Tell Ardsley about yourself..."
-              className="w-full bg-bg-input rounded-xl p-3.5 text-[14px] placeholder:text-text-muted/40 outline-none resize-none min-h-[100px] focus:ring-1 focus:ring-text-muted/30 transition-all"
-            />
-          </div>
-
-          <div className="flex gap-2">
+      {/* Bio — always visible, tap to edit */}
+      {editingBio ? (
+        <div className="mb-5">
+          <textarea
+            value={bioValue}
+            onChange={(e) => setBioValue(e.target.value)}
+            placeholder={"Describe yourself to the Ardsley community.\n\nFor example:\n• Math & science tutor, grades 6-12\n• 3 years experience, $30/hr\n• Available weekends"}
+            autoFocus
+            className="w-full bg-bg-input rounded-xl p-3.5 text-[14px] leading-relaxed placeholder:text-text-muted/40 outline-none resize-none min-h-[130px] focus:ring-1 focus:ring-text-muted/30 transition-all"
+          />
+          <div className="flex gap-2 mt-2">
             <button
-              onClick={handleSave}
-              disabled={saving || !nameValue.trim()}
+              onClick={handleSaveBio}
+              disabled={savingBio}
               className="bg-[#1a1a1a] text-white px-4 py-2 rounded-full font-semibold text-[13px] press disabled:opacity-30"
             >
-              {saving ? "Saving..." : "Save"}
+              {savingBio ? "Saving..." : "Save"}
             </button>
             <button
               onClick={() => {
-                setEditing(false);
-                setNameValue(fullName);
+                setEditingBio(false);
                 setBioValue(bio);
               }}
               className="text-[13px] text-text-muted px-3 py-2 press"
@@ -238,23 +232,63 @@ export function ProfileActions({
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 text-[13px] text-text-muted press"
-          >
-            <Pencil size={14} strokeWidth={1.5} />
-            Edit profile
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 text-[13px] text-red-400 press ml-auto"
-          >
-            <LogOut size={14} strokeWidth={1.5} />
-            Sign out
-          </button>
-        </div>
+        <button
+          onClick={() => setEditingBio(true)}
+          className="w-full text-left mb-5 press rounded-xl transition-colors"
+        >
+          {bio ? (
+            <p className="text-[14px] leading-relaxed whitespace-pre-wrap">
+              {bio}
+            </p>
+          ) : (
+            <div className="bg-bg-input/50 border border-dashed border-border rounded-xl px-4 py-4">
+              <p className="text-[14px] text-text-muted/60 font-medium">
+                Tap to add a bio
+              </p>
+              <p className="text-[12px] text-text-muted/40 mt-0.5">
+                Tell people what services you offer, your experience, rates, etc.
+              </p>
+            </div>
+          )}
+        </button>
       )}
+
+      {/* Stripe + Sign out */}
+      <div className="flex items-center gap-4">
+        {stripeOnboarded ? (
+          <div className="flex items-center gap-1.5 text-green-600 text-[13px]">
+            <CheckCircle size={14} strokeWidth={2} />
+            <span>Payments enabled</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setConnectingStripe(true);
+              fetch("/api/connect/onboard", { method: "POST" })
+                .then((r) => r.json())
+                .then((data) => {
+                  if (data.url) window.location.href = data.url;
+                  else {
+                    alert("Failed to start Stripe setup");
+                    setConnectingStripe(false);
+                  }
+                });
+            }}
+            disabled={connectingStripe}
+            className="flex items-center gap-1.5 text-[13px] text-text-muted press disabled:opacity-40"
+          >
+            <CreditCard size={14} strokeWidth={1.5} />
+            {connectingStripe ? "Connecting..." : "Set up payments"}
+          </button>
+        )}
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-1.5 text-[13px] text-red-400 press ml-auto"
+        >
+          <LogOut size={14} strokeWidth={1.5} />
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }

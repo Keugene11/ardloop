@@ -27,40 +27,11 @@ export default async function ProfilePage() {
 
   return (
     <div className="animate-slide-up">
-      <div className="flex items-center gap-4 mb-5">
-        {profile?.avatar_url ? (
-          <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
-            <Image
-              src={profile.avatar_url}
-              alt={profile.full_name}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className="w-14 h-14 rounded-full bg-bg-input flex items-center justify-center text-[20px] font-semibold text-text-muted">
-            {profile?.full_name?.[0] || "?"}
-          </div>
-        )}
-        <div>
-          <h1 className="text-[20px] font-bold tracking-tight">
-            {profile?.full_name}
-          </h1>
-          <p className="text-[13px] text-text-muted">{profile?.email}</p>
-        </div>
-      </div>
-
-      {profile?.bio && (
-        <p className="text-[14px] leading-relaxed text-text-muted mb-5 whitespace-pre-wrap">
-          {profile.bio}
-        </p>
-      )}
-
       <ProfileActions
         userId={user.id}
         fullName={profile?.full_name || ""}
         avatarUrl={profile?.avatar_url || null}
+        email={profile?.email || ""}
         bio={profile?.bio || ""}
         stripeOnboarded={profile?.stripe_onboarded || false}
       />

@@ -61,10 +61,21 @@ export default async function HomePage() {
     recent_comments: (commentsByPost.get(post.id) || []).reverse(),
   }));
 
+  const { count: userCount } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true });
+
   return (
     <>
       <header className="mb-5">
-        <h1 className="text-[26px] font-extrabold tracking-tight">Ardloop</h1>
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-[26px] font-extrabold tracking-tight">Ardloop</h1>
+          {userCount !== null && userCount > 0 && (
+            <span className="text-[12px] text-text-muted font-medium">
+              {userCount} {userCount === 1 ? "member" : "members"}
+            </span>
+          )}
+        </div>
         <p className="text-[13px] text-text-muted mt-1 leading-snug">
           Talk about events in Ardsley, ask for services such as tutors, babysitters, dogwalkers, and more from Ardsley students and alumni.
         </p>
