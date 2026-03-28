@@ -97,13 +97,15 @@ export function CommentSection({
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-2.5 py-2.5">
               {comment.author.avatar_url ? (
-                <Image
-                  src={comment.author.avatar_url}
-                  alt={comment.author.full_name}
-                  width={28}
-                  height={28}
-                  className="rounded-full shrink-0 mt-0.5"
-                />
+                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mt-0.5">
+                  <Image
+                    src={comment.author.avatar_url}
+                    alt={comment.author.full_name}
+                    width={28}
+                    height={28}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
                 <div className="w-7 h-7 rounded-full bg-bg-input flex items-center justify-center text-[10px] font-semibold text-text-muted shrink-0 mt-0.5">
                   {comment.author.full_name?.[0] || "?"}

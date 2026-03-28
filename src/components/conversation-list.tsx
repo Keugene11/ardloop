@@ -39,13 +39,15 @@ export function ConversationList({
           className="flex items-center gap-3 py-3.5 press"
         >
           {conv.user.avatar_url ? (
-            <Image
-              src={conv.user.avatar_url}
-              alt={conv.user.full_name}
-              width={44}
-              height={44}
-              className="rounded-full shrink-0"
-            />
+            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0">
+              <Image
+                src={conv.user.avatar_url}
+                alt={conv.user.full_name}
+                width={44}
+                height={44}
+                className="w-full h-full object-cover"
+              />
+            </div>
           ) : (
             <div className="w-11 h-11 rounded-full bg-bg-input flex items-center justify-center text-[15px] font-semibold text-text-muted shrink-0">
               {conv.user.full_name?.[0] || "?"}

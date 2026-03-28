@@ -44,13 +44,15 @@ export function PostCard({
     <Link href={`/post/${post.id}`}>
       <article className="flex gap-3 py-3.5">
         {post.author.avatar_url ? (
-          <Image
-            src={post.author.avatar_url}
-            alt={post.author.full_name}
-            width={36}
-            height={36}
-            className="rounded-full shrink-0 mt-0.5"
-          />
+          <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5">
+            <Image
+              src={post.author.avatar_url}
+              alt={post.author.full_name}
+              width={36}
+              height={36}
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
           <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted shrink-0 mt-0.5">
             {post.author.full_name?.[0] || "?"}
@@ -123,13 +125,15 @@ export function PostCard({
               {post.recent_comments.map((comment) => (
                 <div key={comment.id} className="flex gap-2 py-1.5 pl-2.5">
                   {comment.author.avatar_url ? (
-                    <Image
-                      src={comment.author.avatar_url}
-                      alt={comment.author.full_name}
-                      width={20}
-                      height={20}
-                      className="rounded-full shrink-0 mt-0.5"
-                    />
+                    <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 mt-0.5">
+                      <Image
+                        src={comment.author.avatar_url}
+                        alt={comment.author.full_name}
+                        width={20}
+                        height={20}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   ) : (
                     <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[8px] font-semibold text-text-muted shrink-0 mt-0.5">
                       {comment.author.full_name?.[0] || "?"}

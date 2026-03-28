@@ -61,13 +61,15 @@ export default async function PostPage({
 
       <div className="flex gap-3 mb-4">
         {post.author.avatar_url ? (
-          <Image
-            src={post.author.avatar_url}
-            alt={post.author.full_name}
-            width={40}
-            height={40}
-            className="rounded-full shrink-0"
-          />
+          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+            <Image
+              src={post.author.avatar_url}
+              alt={post.author.full_name}
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
           <div className="w-10 h-10 rounded-full bg-bg-input flex items-center justify-center text-[15px] font-semibold text-text-muted shrink-0">
             {post.author.full_name?.[0] || "?"}

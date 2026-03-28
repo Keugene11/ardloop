@@ -29,13 +29,15 @@ export default async function ProfilePage() {
     <div className="animate-slide-up">
       <div className="flex items-center gap-4 mb-5">
         {profile?.avatar_url ? (
-          <Image
-            src={profile.avatar_url}
-            alt={profile.full_name}
-            width={56}
-            height={56}
-            className="rounded-full"
-          />
+          <div className="w-14 h-14 rounded-full overflow-hidden shrink-0">
+            <Image
+              src={profile.avatar_url}
+              alt={profile.full_name}
+              width={56}
+              height={56}
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
           <div className="w-14 h-14 rounded-full bg-bg-input flex items-center justify-center text-[20px] font-semibold text-text-muted">
             {profile?.full_name?.[0] || "?"}

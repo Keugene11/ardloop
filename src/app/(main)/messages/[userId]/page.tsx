@@ -50,13 +50,15 @@ export default async function ChatPage({
           <ArrowLeft size={20} strokeWidth={1.5} className="text-text-muted" />
         </Link>
         {otherUser.avatar_url ? (
-          <Image
-            src={otherUser.avatar_url}
-            alt={otherUser.full_name}
-            width={36}
-            height={36}
-            className="rounded-full"
-          />
+          <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+            <Image
+              src={otherUser.avatar_url}
+              alt={otherUser.full_name}
+              width={36}
+              height={36}
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
           <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[14px] font-semibold text-text-muted">
             {otherUser.full_name?.[0] || "?"}
