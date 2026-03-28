@@ -57,6 +57,8 @@ export default async function ProfilePage() {
 
       <ProfileActions
         userId={user.id}
+        fullName={profile?.full_name || ""}
+        avatarUrl={profile?.avatar_url || null}
         bio={profile?.bio || ""}
         stripeOnboarded={profile?.stripe_onboarded || false}
       />
