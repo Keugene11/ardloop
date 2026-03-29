@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Heart, MessageCircle } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 
 export default async function UserProfilePage({
@@ -115,7 +115,7 @@ export default async function UserProfilePage({
         <h3 className="text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-3">
           Posts · {formattedPosts.length}
         </h3>
-        <div className="divide-y divide-border">
+        <div className="space-y-3">
           {formattedPosts.length === 0 ? (
             <p className="text-[14px] text-text-muted text-center py-10">
               No posts yet.
@@ -125,23 +125,44 @@ export default async function UserProfilePage({
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
-                className="block py-3 press"
+                className="block bg-bg-card border border-border rounded-2xl px-4 py-3.5 press hover:bg-bg-card-hover transition-colors"
               >
-                <p className="text-[14px] leading-relaxed line-clamp-2">
+                <p className="text-[14px] leading-relaxed line-clamp-3 whitespace-pre-wrap">
                   {post.content}
                 </p>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[11px] text-text-muted">
+
+                {post.price && (
+                  <span className="inline-block mt-2 text-[13px] font-semibold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">
+                    ${(post.price / 100).toFixed(2)}
+                  </span>
+                )}
+
+                {post.image_url && (
+                  <div className="mt-2.5 rounded-xl overflow-hidden">
+                    <Image
+                      src={post.image_url}
+                      alt="Post image"
+                      width={400}
+                      height={200}
+                      className="w-full h-32 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 mt-2.5 text-text-muted">
+                  <span className="text-[12px]">
                     {timeAgo(post.created_at)}
                   </span>
                   {post.like_count > 0 && (
-                    <span className="text-[11px] text-text-muted">
-                      {post.like_count} {post.like_count === 1 ? "like" : "likes"}
+                    <span className="flex items-center gap-1 text-[12px]">
+                      <Heart size={12} strokeWidth={1.5} />
+                      {post.like_count}
                     </span>
                   )}
                   {post.comment_count > 0 && (
-                    <span className="text-[11px] text-text-muted">
-                      {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
+                    <span className="flex items-center gap-1 text-[12px]">
+                      <MessageCircle size={12} strokeWidth={1.5} />
+                      {post.comment_count}
                     </span>
                   )}
                 </div>
