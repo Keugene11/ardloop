@@ -1,4 +1,4 @@
--- Ardloop Database Schema
+-- Ardsleypost Database Schema
 -- Run this in the Supabase SQL Editor after creating the project
 
 -- Enable UUID extension

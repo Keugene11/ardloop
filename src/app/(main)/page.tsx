@@ -69,7 +69,7 @@ export default async function HomePage() {
     <>
       <header className="mb-5">
         <div className="flex items-baseline justify-between">
-          <h1 className="text-[26px] font-extrabold tracking-tight">Ardloop</h1>
+          <h1 className="text-[26px] font-extrabold tracking-tight">Ardsleypost</h1>
           {userCount !== null && userCount > 0 && (
             <span className="text-[12px] text-text-muted font-medium">
               {userCount} {userCount === 1 ? "member" : "members"}

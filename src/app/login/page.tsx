@@ -18,7 +18,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm animate-slide-up">
         <div className="text-center mb-12">
           <h1 className="text-[42px] font-extrabold tracking-tight text-text">
-            Ardloop
+            Ardsleypost
           </h1>
           <p className="text-[15px] text-text-muted mt-1">
             Your Ardsley community
