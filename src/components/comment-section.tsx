@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Heart, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { timeAgo } from "@/lib/utils";
@@ -96,26 +97,34 @@ export function CommentSection({
         <div className="mb-4">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-2.5 py-2.5">
-              {comment.author.avatar_url ? (
-                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mt-0.5">
-                  <Image
-                    src={comment.author.avatar_url}
-                    alt={comment.author.full_name}
-                    width={28}
-                    height={28}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-bg-input flex items-center justify-center text-[10px] font-semibold text-text-muted shrink-0 mt-0.5">
-                  {comment.author.full_name?.[0] || "?"}
-                </div>
-              )}
+              <Link
+                href={`/user/${comment.author_id}`}
+                className="shrink-0 mt-0.5"
+              >
+                {comment.author.avatar_url ? (
+                  <div className="w-7 h-7 rounded-full overflow-hidden">
+                    <Image
+                      src={comment.author.avatar_url}
+                      alt={comment.author.full_name}
+                      width={28}
+                      height={28}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-bg-input flex items-center justify-center text-[10px] font-semibold text-text-muted">
+                    {comment.author.full_name?.[0] || "?"}
+                  </div>
+                )}
+              </Link>
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[13px] font-semibold">
+                  <Link
+                    href={`/user/${comment.author_id}`}
+                    className="text-[13px] font-semibold hover:underline"
+                  >
                     {comment.author.full_name}
-                  </span>
+                  </Link>
                   <span className="text-[11px] text-text-muted">
                     {timeAgo(comment.created_at)}
                   </span>

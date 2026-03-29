@@ -43,27 +43,37 @@ export function PostCard({
   return (
     <Link href={`/post/${post.id}`}>
       <article className="flex gap-3 py-3.5">
-        {post.author.avatar_url ? (
-          <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5">
-            <Image
-              src={post.author.avatar_url}
-              alt={post.author.full_name}
-              width={36}
-              height={36}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted shrink-0 mt-0.5">
-            {post.author.full_name?.[0] || "?"}
-          </div>
-        )}
+        <Link
+          href={`/user/${post.author_id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 mt-0.5"
+        >
+          {post.author.avatar_url ? (
+            <div className="w-9 h-9 rounded-full overflow-hidden">
+              <Image
+                src={post.author.avatar_url}
+                alt={post.author.full_name}
+                width={36}
+                height={36}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted">
+              {post.author.full_name?.[0] || "?"}
+            </div>
+          )}
+        </Link>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <span className="text-[14px] font-semibold truncate">
+            <Link
+              href={`/user/${post.author_id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[14px] font-semibold truncate hover:underline"
+            >
               {post.author.full_name}
-            </span>
+            </Link>
             <span className="text-[12px] text-text-muted shrink-0">
               {timeAgo(post.created_at)}
             </span>
@@ -124,25 +134,35 @@ export function PostCard({
             <div className="mt-2.5 pl-1 border-l-2 border-border ml-1">
               {post.recent_comments.map((comment) => (
                 <div key={comment.id} className="flex gap-2 py-1.5 pl-2.5">
-                  {comment.author.avatar_url ? (
-                    <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 mt-0.5">
-                      <Image
-                        src={comment.author.avatar_url}
-                        alt={comment.author.full_name}
-                        width={20}
-                        height={20}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[8px] font-semibold text-text-muted shrink-0 mt-0.5">
-                      {comment.author.full_name?.[0] || "?"}
-                    </div>
-                  )}
+                  <Link
+                    href={`/user/${comment.author_id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="shrink-0 mt-0.5"
+                  >
+                    {comment.author.avatar_url ? (
+                      <div className="w-5 h-5 rounded-full overflow-hidden">
+                        <Image
+                          src={comment.author.avatar_url}
+                          alt={comment.author.full_name}
+                          width={20}
+                          height={20}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[8px] font-semibold text-text-muted">
+                        {comment.author.full_name?.[0] || "?"}
+                      </div>
+                    )}
+                  </Link>
                   <p className="text-[13px] leading-snug min-w-0">
-                    <span className="font-semibold">
+                    <Link
+                      href={`/user/${comment.author_id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-semibold hover:underline"
+                    >
                       {comment.author.full_name}
-                    </span>{" "}
+                    </Link>{" "}
                     <span className="text-text-muted">
                       {comment.content.length > 100
                         ? comment.content.slice(0, 100) + "..."
