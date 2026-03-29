@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const showDemo = tapCount >= 5;
+
   const handleGoogleLogin = async () => {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
@@ -13,6 +18,21 @@ export default function LoginPage() {
     });
   };
 
+  const handleDemoLogin = async () => {
+    setDemoLoading(true);
+    try {
+      await fetch("/api/demo-login", { method: "POST" });
+      const supabase = createClient();
+      await supabase.auth.signInWithPassword({
+        email: "demo@ardsleypost.com",
+        password: "AppReview2026!",
+      });
+      window.location.href = "/";
+    } catch {
+      setDemoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-bg">
       <div className="w-full max-w-sm animate-slide-up">
@@ -20,7 +40,10 @@ export default function LoginPage() {
           <h1 className="text-[42px] font-extrabold tracking-tight text-text">
             Ardsleypost
           </h1>
-          <p className="text-[15px] text-text-muted mt-1">
+          <p
+            className="text-[15px] text-text-muted mt-1"
+            onClick={() => setTapCount((c) => c + 1)}
+          >
             Your Ardsley community
           </p>
         </div>
@@ -49,6 +72,16 @@ export default function LoginPage() {
           </svg>
           Continue with Google
         </button>
+
+        {showDemo && (
+          <button
+            onClick={handleDemoLogin}
+            disabled={demoLoading}
+            className="w-full mt-3 flex items-center justify-center gap-2 bg-bg-input text-text py-3.5 rounded-2xl font-semibold press text-[14px]"
+          >
+            {demoLoading ? "Signing in..." : "Demo Login"}
+          </button>
+        )}
 
         <p className="text-[12px] text-text-muted/60 text-center mt-8">
           By signing in, you agree to be a good neighbor.
