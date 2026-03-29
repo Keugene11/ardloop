@@ -8,10 +8,11 @@ workflows:
         - appstore_credentials
       node: 20
     scripts:
-      - name: Install pnpm
-        script: npm install -g pnpm
       - name: Install dependencies
-        script: pnpm install
+        script: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install
       - name: Sync Capacitor
         script: npx cap sync ios
       - name: Fetch signing files
