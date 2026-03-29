@@ -21,13 +21,16 @@ export default function LoginPage() {
   const handleDemoLogin = async () => {
     setDemoLoading(true);
     try {
-      await fetch("/api/demo-login", { method: "POST" });
-      const supabase = createClient();
-      await supabase.auth.signInWithPassword({
-        email: "demo@ardsleypost.com",
-        password: "AppReview2026!",
-      });
-      window.location.href = "/";
+      const res = await fetch("/api/demo-login", { method: "POST" });
+      if (!res.ok) { setDemoLoading(false); return; }
+      const { access_token, refresh_token } = await res.json();
+      if (access_token && refresh_token) {
+        const supabase = createClient();
+        await supabase.auth.setSession({ access_token, refresh_token });
+        window.location.href = "/";
+      } else {
+        setDemoLoading(false);
+      }
     } catch {
       setDemoLoading(false);
     }

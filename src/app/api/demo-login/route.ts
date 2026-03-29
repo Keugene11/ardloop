@@ -1,11 +1,18 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-const DEMO_EMAIL = "demo@ardsleypost.com";
-const DEMO_PASSWORD = "AppReview2026!";
+const DEMO_EMAIL = process.env.DEMO_EMAIL || "demo@ardsleypost.com";
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD!;
 
 export async function POST() {
-  const supabase = await createClient();
+  if (!DEMO_PASSWORD) {
+    return NextResponse.json({ error: "Demo login not configured" }, { status: 404 });
+  }
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // Try to sign in first
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -38,8 +45,20 @@ export async function POST() {
       });
     }
 
-    return NextResponse.json({ success: true });
+    // Sign in again to get session
+    const { data: signInData } = await supabase.auth.signInWithPassword({
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+    });
+
+    return NextResponse.json({
+      access_token: signInData.session?.access_token,
+      refresh_token: signInData.session?.refresh_token,
+    });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    access_token: data.session?.access_token,
+    refresh_token: data.session?.refresh_token,
+  });
 }

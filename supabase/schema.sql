@@ -154,13 +154,15 @@ create policy "Users can view their own purchases"
   on public.purchases for select
   using (auth.uid() = buyer_id or auth.uid() = seller_id);
 
-create policy "System can insert purchases"
+-- INSERT and UPDATE blocked for all users — only the service_role key
+-- (used by API routes and Stripe webhooks) can modify purchases.
+create policy "No direct insert purchases"
   on public.purchases for insert
-  with check (true);
+  with check (false);
 
-create policy "System can update purchases"
+create policy "No direct update purchases"
   on public.purchases for update
-  using (true);
+  using (false);
 
 -- Indexes for performance
 create index posts_author_id_idx on public.posts (author_id);
