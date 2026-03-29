@@ -77,7 +77,7 @@ export default async function HomePage() {
           )}
         </div>
         <p className="text-[13px] text-text-muted mt-1 leading-snug">
-          Talk about events in Ardsley, ask for services such as tutors, babysitters, dogwalkers, and more from Ardsley students and alumni.
+          The social network built for Ardsley students, parents, and alumni.
         </p>
       </header>
       <Feed initialPosts={formattedPosts} userId={user?.id || null} />
