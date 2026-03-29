@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Ardsleypost — Ardsley Community",
-  description: "Connect with your Ardsley community. Post, chat, and find local services.",
+  description: "The social network built for Ardsley students, parents, and alumni.",
 };
 
 export default function RootLayout({
