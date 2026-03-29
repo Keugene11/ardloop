@@ -83,12 +83,6 @@ export function PostCard({
             {post.content}
           </p>
 
-          {post.price && (
-            <span className="inline-block mt-2 text-[13px] font-semibold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">
-              ${(post.price / 100).toFixed(2)}
-            </span>
-          )}
-
           {post.image_url && (
             <div className="mt-2.5 rounded-xl overflow-hidden">
               <Image

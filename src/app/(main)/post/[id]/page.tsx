@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { CommentSection } from "@/components/comment-section";
-import { BuyButton } from "@/components/buy-button";
 
 export default async function PostPage({
   params,
@@ -96,20 +95,6 @@ export default async function PostPage({
             height={300}
             className="w-full object-cover"
           />
-        </div>
-      )}
-
-      {post.price && (
-        <div className="flex items-center justify-between mb-4 py-3 px-4 bg-green-50 rounded-xl">
-          <span className="text-[18px] font-bold text-green-700">
-            ${(post.price / 100).toFixed(2)}
-          </span>
-          {user && user.id !== post.author_id && (
-            <BuyButton
-              postId={id}
-              sellerOnboarded={post.author.stripe_onboarded}
-            />
-          )}
         </div>
       )}
 

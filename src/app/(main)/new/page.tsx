@@ -1,16 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ImagePlus, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function NewPostPage() {
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [price, setPrice] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +41,22 @@ export default function NewPostPage() {
 
     if (!user) return;
 
-    const priceValue = price ? Math.round(parseFloat(price) * 100) : null;
+    let imageUrl: string | null = null;
+
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const res = await fetch("/api/posts/image", { method: "POST", body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        imageUrl = data.image_url;
+      }
+    }
 
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
       content: content.trim(),
-      price: priceValue,
+      image_url: imageUrl,
     });
 
     if (!error) {
@@ -67,29 +94,43 @@ export default function NewPostPage() {
           autoFocus
         />
 
-        <div className="border-t border-border pt-4 mt-2">
-          <div className="flex items-center gap-3">
-            <span className="text-[13px] text-text-muted">Price</span>
-            <div className="relative flex-1 max-w-[140px]">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-text-muted">
-                $
-              </span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="optional"
-                className="w-full bg-bg-input rounded-full pl-7 pr-3 py-2 text-[13px] placeholder:text-text-muted/40 outline-none"
+        {imagePreview && (
+          <div className="relative mt-2 mb-3">
+            <div className="rounded-xl overflow-hidden">
+              <Image
+                src={imagePreview}
+                alt="Selected image"
+                width={400}
+                height={300}
+                className="w-full object-cover max-h-[300px]"
               />
             </div>
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute top-2 right-2 w-7 h-7 bg-black/60 rounded-full flex items-center justify-center press"
+            >
+              <X size={16} strokeWidth={2} className="text-white" />
+            </button>
           </div>
-          {price && (
-            <p className="text-[11px] text-text-muted mt-1.5 ml-0.5">
-              10% platform fee applies
-            </p>
-          )}
+        )}
+
+        <div className="border-t border-border pt-3 mt-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 text-[13px] text-text-muted press"
+          >
+            <ImagePlus size={18} strokeWidth={1.5} />
+            {imageFile ? "Change image" : "Add image"}
+          </button>
         </div>
       </form>
     </div>
