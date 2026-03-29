@@ -40,7 +40,10 @@ workflows:
         script: |
           cd ios/App
           xcode-project build-ipa \
-            --archive-directory build/App.xcarchive
+            --project App.xcodeproj \
+            --scheme App \
+            --archive-directory build/App.xcarchive \
+            --ipa-directory build/ios/ipa
     artifacts:
       - ios/App/build/ios/ipa/*.ipa
     publishing:
