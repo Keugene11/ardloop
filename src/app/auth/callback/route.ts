@@ -16,6 +16,8 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
+      let isNewUser = false;
+
       if (user) {
         const { data: existingProfile } = await supabase
           .from("profiles")
@@ -24,6 +26,7 @@ export async function GET(request: Request) {
           .single();
 
         if (!existingProfile) {
+          isNewUser = true;
           await supabase.from("profiles").insert({
             id: user.id,
             email: user.email,
@@ -34,15 +37,16 @@ export async function GET(request: Request) {
         }
       }
 
+      const destination = isNewUser ? "/welcome" : next;
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
 
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${destination}`);
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`https://${forwardedHost}${destination}`);
       } else {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${destination}`);
       }
     }
   }
