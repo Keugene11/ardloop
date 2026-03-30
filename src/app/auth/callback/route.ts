@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -7,11 +8,7 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
-    const cookiesToSet: { name: string; value: string; options: Record<string, unknown> }[] = [];
-    let resolveCookies: () => void;
-    const cookiesReady = new Promise<void>((resolve) => {
-      resolveCookies = resolve;
-    });
+    const cookieStore = await cookies();
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,15 +16,12 @@ export async function GET(request: Request) {
       {
         cookies: {
           getAll() {
-            const cookieHeader = request.headers.get("cookie") || "";
-            return cookieHeader.split(";").filter(Boolean).map((c) => {
-              const [name, ...rest] = c.trim().split("=");
-              return { name, value: rest.join("=") };
-            });
+            return cookieStore.getAll();
           },
-          setAll(cookies) {
-            cookiesToSet.push(...cookies);
-            resolveCookies();
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
           },
         },
       }
@@ -36,12 +30,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Wait for the async onAuthStateChange callback to call setAll
-      await Promise.race([
-        cookiesReady,
-        new Promise<void>((resolve) => setTimeout(resolve, 200)),
-      ]);
-
       // Ensure profile exists
       const {
         data: { user },
@@ -68,20 +56,13 @@ export async function GET(request: Request) {
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
 
-      let redirectUrl: string;
       if (isLocalEnv) {
-        redirectUrl = `${origin}${next}`;
+        return NextResponse.redirect(`${origin}${next}`);
       } else if (forwardedHost) {
-        redirectUrl = `https://${forwardedHost}${next}`;
+        return NextResponse.redirect(`https://${forwardedHost}${next}`);
       } else {
-        redirectUrl = `${origin}${next}`;
+        return NextResponse.redirect(`${origin}${next}`);
       }
-
-      const response = NextResponse.redirect(redirectUrl);
-      cookiesToSet.forEach(({ name, value, options }) => {
-        response.cookies.set(name, value, options as Record<string, string>);
-      });
-      return response;
     }
   }
 
