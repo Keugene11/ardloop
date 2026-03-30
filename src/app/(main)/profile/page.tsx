@@ -46,7 +46,6 @@ export default async function ProfilePage() {
         avatarUrl={profile?.avatar_url || null}
         email={profile?.email || ""}
         bio={profile?.bio || ""}
-        stripeOnboarded={profile?.stripe_onboarded || false}
       />
 
       <div className="mt-8">

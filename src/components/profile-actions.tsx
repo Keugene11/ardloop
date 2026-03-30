@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut, CreditCard, CheckCircle, Camera, Check, X } from "lucide-react";
+import { LogOut, Camera, Check, X } from "lucide-react";
 
 export function ProfileActions({
   userId,
@@ -12,14 +12,12 @@ export function ProfileActions({
   avatarUrl,
   email,
   bio,
-  stripeOnboarded,
 }: {
   userId: string;
   fullName: string;
   avatarUrl: string | null;
   email: string;
   bio: string;
-  stripeOnboarded: boolean;
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,8 +30,6 @@ export function ProfileActions({
   const [savingBio, setSavingBio] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
-  const [connectingStripe, setConnectingStripe] = useState(false);
-
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -253,34 +249,8 @@ export function ProfileActions({
         </button>
       )}
 
-      {/* Stripe + Sign out */}
-      <div className="flex items-center gap-4">
-        {stripeOnboarded ? (
-          <div className="flex items-center gap-1.5 text-green-600 text-[13px]">
-            <CheckCircle size={14} strokeWidth={2} />
-            <span>Payments enabled</span>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              setConnectingStripe(true);
-              fetch("/api/connect/onboard", { method: "POST" })
-                .then((r) => r.json())
-                .then((data) => {
-                  if (data.url) window.location.href = data.url;
-                  else {
-                    alert("Failed to start Stripe setup");
-                    setConnectingStripe(false);
-                  }
-                });
-            }}
-            disabled={connectingStripe}
-            className="flex items-center gap-1.5 text-[13px] text-text-muted press disabled:opacity-40"
-          >
-            <CreditCard size={14} strokeWidth={1.5} />
-            {connectingStripe ? "Connecting..." : "Set up payments"}
-          </button>
-        )}
+      {/* Sign out */}
+      <div className="flex items-center">
         <button
           onClick={handleSignOut}
           className="flex items-center gap-1.5 text-[13px] text-red-400 press ml-auto"
