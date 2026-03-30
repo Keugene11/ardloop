@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { CommentSection } from "@/components/comment-section";
+import { DeletePostButton } from "@/components/delete-post-button";
 
 export default async function PostPage({
   params,
@@ -96,6 +97,10 @@ export default async function PostPage({
             className="w-full object-cover"
           />
         </div>
+      )}
+
+      {user && user.id === post.author_id && (
+        <DeletePostButton postId={id} />
       )}
 
       <div className="border-t border-border pt-4">

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, MessageCircle, Send, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post } from "@/types";
 import { timeAgo } from "@/lib/utils";
@@ -17,6 +18,23 @@ export function PostCard({
 }) {
   const [liked, setLiked] = useState(post.user_has_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
+  const [deleted, setDeleted] = useState(false);
+  const router = useRouter();
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Delete this post?")) return;
+
+    const supabase = createClient();
+    await supabase.from("comments").delete().eq("post_id", post.id);
+    await supabase.from("likes").delete().eq("post_id", post.id);
+    await supabase.from("posts").delete().eq("id", post.id).eq("author_id", userId);
+    setDeleted(true);
+    router.refresh();
+  };
+
+  if (deleted) return null;
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -121,6 +139,14 @@ export function PostCard({
               >
                 <Send size={14} strokeWidth={1.5} />
               </Link>
+            )}
+            {userId && userId === post.author_id && (
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-1 text-[13px] text-text-muted hover:text-red-500 press ml-auto"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+              </button>
             )}
           </div>
 
