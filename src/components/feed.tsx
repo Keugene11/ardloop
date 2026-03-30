@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ImagePlus } from "lucide-react";
-import Link from "next/link";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Search, ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 import type { Post } from "@/types";
 import { PostCard } from "./post-card";
+import { createClient } from "@/lib/supabase/client";
 
 export function Feed({
   initialPosts,
@@ -18,7 +19,68 @@ export function Feed({
   userAvatarUrl: string | null;
   userFullName: string | null;
 }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+  const [content, setContent] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handlePost = async () => {
+    if (!content.trim() || posting) return;
+    setPosting(true);
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) { setPosting(false); return; }
+
+    let imageUrl: string | null = null;
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const res = await fetch("/api/posts/image", { method: "POST", body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        imageUrl = data.image_url;
+      }
+    }
+
+    const { error } = await supabase.from("posts").insert({
+      author_id: user.id,
+      content: content.trim(),
+      image_url: imageUrl,
+    });
+
+    if (!error) {
+      setContent("");
+      removeImage();
+      router.refresh();
+    }
+    setPosting(false);
+  };
+
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  };
 
   const filtered = initialPosts.filter((p) => {
     if (!search) return true;
@@ -32,33 +94,89 @@ export function Feed({
   return (
     <div>
       {userId && (
-        <Link
-          href="/new"
-          className="flex items-center gap-3 bg-bg-card border border-border rounded-2xl px-4 py-3 mb-4 press"
-        >
-          {userAvatarUrl ? (
-            <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
-              <Image
-                src={userAvatarUrl}
-                alt={userFullName || "You"}
-                width={36}
-                height={36}
-                className="w-full h-full object-cover"
+        <div className="border-b border-border pb-3 mb-1">
+          <div className="flex gap-3">
+            {userAvatarUrl ? (
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5">
+                <Image
+                  src={userAvatarUrl}
+                  alt={userFullName || "You"}
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted shrink-0 mt-0.5">
+                {userFullName?.[0] || "?"}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <textarea
+                ref={textareaRef}
+                data-composer
+                value={content}
+                onChange={(e) => {
+                  setContent(e.target.value);
+                  autoResize(e.target);
+                }}
+                placeholder="What's happening in Ardsley?"
+                rows={1}
+                className="w-full bg-transparent text-[15px] placeholder:text-text-muted/40 outline-none resize-none leading-relaxed"
               />
+
+              {imagePreview && (
+                <div className="relative mt-2">
+                  <div className="rounded-xl overflow-hidden">
+                    <Image
+                      src={imagePreview}
+                      alt="Selected image"
+                      width={400}
+                      height={300}
+                      className="w-full object-cover max-h-[200px]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center press"
+                  >
+                    <X size={14} strokeWidth={2} className="text-white" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mt-2">
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-text-muted/50 press"
+                  >
+                    <ImagePlus size={18} strokeWidth={1.5} />
+                  </button>
+                </div>
+                <button
+                  onClick={handlePost}
+                  disabled={!content.trim() || posting}
+                  className="bg-[#1a1a1a] text-white px-4 py-1.5 rounded-full font-semibold text-[13px] press disabled:opacity-30"
+                >
+                  {posting ? "Posting..." : "Post"}
+                </button>
+              </div>
             </div>
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted shrink-0">
-              {userFullName?.[0] || "?"}
-            </div>
-          )}
-          <span className="flex-1 text-[14px] text-text-muted/50">
-            What&apos;s happening in Ardsley?
-          </span>
-          <ImagePlus size={18} strokeWidth={1.5} className="text-text-muted/40" />
-        </Link>
+          </div>
+        </div>
       )}
 
-      <div className="relative mb-2">
+      <div className="relative mb-2 mt-2">
         <Search
           size={15}
           strokeWidth={1.5}
