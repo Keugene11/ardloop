@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Pencil, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -223,14 +223,24 @@ export function ServicesEditor({
                     <>
                       <textarea
                         value={entry.details}
-                        onChange={(e) => updateDetails(type, e.target.value)}
+                        onChange={(e) => {
+                          updateDetails(type, e.target.value);
+                          e.target.style.height = "auto";
+                          e.target.style.height = e.target.scrollHeight + "px";
+                        }}
+                        ref={(el) => {
+                          if (el) {
+                            el.style.height = "auto";
+                            el.style.height = el.scrollHeight + "px";
+                          }
+                        }}
                         placeholder={
                           type === "other"
                             ? "What service? Add details..."
                             : "Add details (rates, availability, subjects...)"
                         }
                         maxLength={5000}
-                        rows={3}
+                        rows={2}
                         className="w-full bg-white border border-border rounded-xl px-3.5 py-2.5 text-[13px] placeholder:text-text-muted/40 outline-none focus:border-text-muted transition-colors resize-none leading-relaxed"
                       />
                       {entry.details.length > 4500 && (
