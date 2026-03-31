@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { NativeAuthInit } from "@/components/native-auth-init";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -40,7 +41,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NativeAuthInit />
+        {children}
+      </body>
     </html>
   );
 }

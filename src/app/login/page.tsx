@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isNativePlatform, nativeOAuthSignIn } from "@/lib/capacitor-auth";
 
 export default function LoginPage() {
   const [demoLoading, setDemoLoading] = useState(false);
@@ -10,6 +11,10 @@ export default function LoginPage() {
   const showDemo = tapCount >= 5;
 
   const handleGoogleLogin = async () => {
+    if (isNativePlatform()) {
+      await nativeOAuthSignIn("google");
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -20,6 +25,10 @@ export default function LoginPage() {
   };
 
   const handleAppleLogin = async () => {
+    if (isNativePlatform()) {
+      await nativeOAuthSignIn("apple");
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "apple",
