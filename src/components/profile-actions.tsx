@@ -6,6 +6,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { LogOut, Camera, Check, X, Pencil, Trash2, FileText, Shield } from "lucide-react";
+import { ROLE_OPTIONS, ROLE_LABELS } from "@/types";
+import type { UserRole } from "@/types";
 
 export function ProfileActions({
   userId,
@@ -13,12 +15,14 @@ export function ProfileActions({
   avatarUrl,
   email,
   bio,
+  role,
 }: {
   userId: string;
   fullName: string;
   avatarUrl: string | null;
   email: string;
   bio: string;
+  role: UserRole | null;
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +36,8 @@ export function ProfileActions({
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
   const [toast, setToast] = useState<string | null>(null);
+  const [roleValue, setRoleValue] = useState<UserRole | null>(role);
+  const [savingRole, setSavingRole] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -101,6 +107,18 @@ export function ProfileActions({
       .eq("id", userId);
     setSavingBio(false);
     setEditingBio(false);
+    router.refresh();
+  };
+
+  const handleRoleChange = async (newRole: UserRole) => {
+    setRoleValue(newRole);
+    setSavingRole(true);
+    const supabase = createClient();
+    await supabase
+      .from("profiles")
+      .update({ role: newRole })
+      .eq("id", userId);
+    setSavingRole(false);
     router.refresh();
   };
 
@@ -233,6 +251,29 @@ export function ProfileActions({
             </button>
           )}
           <p className="text-[13px] text-text-muted">{email}</p>
+        </div>
+      </div>
+
+      {/* Role selector */}
+      <div className="mb-5">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-text-muted mb-2">
+          I am a
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {ROLE_OPTIONS.map((r) => (
+            <button
+              key={r}
+              onClick={() => handleRoleChange(r)}
+              disabled={savingRole}
+              className={`px-4 py-2 rounded-full text-[13px] font-semibold press transition-colors ${
+                roleValue === r
+                  ? "bg-[#1a1a1a] text-white"
+                  : "bg-bg-input text-text-muted"
+              }`}
+            >
+              {ROLE_LABELS[r]}
+            </button>
+          ))}
         </div>
       </div>
 

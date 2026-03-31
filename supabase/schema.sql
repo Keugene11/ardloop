@@ -11,6 +11,7 @@ create table public.profiles (
   full_name text not null default '',
   avatar_url text,
   bio text,
+  role text check (role in ('student', 'parent', 'alumni', 'other')),
   stripe_customer_id text,
   stripe_account_id text,
   stripe_onboarded boolean default false,

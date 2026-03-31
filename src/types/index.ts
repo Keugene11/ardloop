@@ -16,12 +16,23 @@ export const SERVICE_LABELS: Record<ServiceType, string> = {
   pet_watching: "Pet Watching",
 };
 
+export const ROLE_OPTIONS = ["student", "parent", "alumni", "other"] as const;
+export type UserRole = (typeof ROLE_OPTIONS)[number];
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  student: "Student",
+  parent: "Parent",
+  alumni: "Alumni",
+  other: "Other",
+};
+
 export interface Profile {
   id: string;
   email: string;
   full_name: string;
   avatar_url: string | null;
   bio: string | null;
+  role: UserRole | null;
   services: Services | null;
   stripe_account_id: string | null;
   stripe_onboarded: boolean;

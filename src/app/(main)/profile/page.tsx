@@ -48,6 +48,7 @@ export default async function ProfilePage() {
         avatarUrl={profile?.avatar_url || null}
         email={profile?.email || ""}
         bio={profile?.bio || ""}
+        role={profile?.role || null}
       />
 
       <ServicesEditor

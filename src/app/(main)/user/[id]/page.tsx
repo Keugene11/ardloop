@@ -6,7 +6,8 @@ import { ArrowLeft, Send, Heart, MessageCircle } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { ServicesDisplay } from "@/components/services-display";
 import { UserActions } from "@/components/user-actions";
-import type { Services } from "@/types";
+import type { Services, UserRole } from "@/types";
+import { ROLE_LABELS } from "@/types";
 
 export default async function UserProfilePage({
   params,
@@ -94,6 +95,12 @@ export default async function UserProfilePage({
         <h2 className="text-[22px] font-bold tracking-tight">
           {profile.full_name || "Anonymous"}
         </h2>
+
+        {profile.role && (
+          <span className="inline-block mt-1 px-3 py-0.5 rounded-full bg-bg-input text-[12px] font-semibold text-text-muted">
+            {ROLE_LABELS[profile.role as UserRole]}
+          </span>
+        )}
 
         <p className="text-[13px] text-text-muted mt-0.5">
           Member since {memberSince}
