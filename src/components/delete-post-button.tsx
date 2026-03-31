@@ -11,8 +11,10 @@ export function DeletePostButton({ postId }: { postId: string }) {
     if (!confirm("Delete this post?")) return;
 
     const supabase = createClient();
-    await supabase.from("comments").delete().eq("post_id", postId);
-    await supabase.from("likes").delete().eq("post_id", postId);
+    await Promise.all([
+      supabase.from("comments").delete().eq("post_id", postId),
+      supabase.from("likes").delete().eq("post_id", postId),
+    ]);
     await supabase.from("posts").delete().eq("id", postId);
     router.push("/");
     router.refresh();
@@ -21,10 +23,9 @@ export function DeletePostButton({ postId }: { postId: string }) {
   return (
     <button
       onClick={handleDelete}
-      className="flex items-center gap-1.5 text-[13px] text-text-muted hover:text-red-500 press mb-4"
+      className="flex items-center gap-1.5 text-[13px] text-text-muted/50 hover:text-red-500 press transition-colors"
     >
       <Trash2 size={14} strokeWidth={1.5} />
-      Delete post
     </button>
   );
 }

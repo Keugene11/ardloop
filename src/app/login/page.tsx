@@ -39,12 +39,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-bg">
       <div className="w-full max-w-sm animate-slide-up">
-        <div className="text-center mb-12">
-          <h1 className="text-[42px] font-extrabold tracking-tight text-text">
+        <div className="text-center mb-14">
+          <h1 className="text-[44px] font-extrabold tracking-tight text-text leading-none">
             Ardsleypost
           </h1>
           <p
-            className="text-[15px] text-text-muted mt-1"
+            className="text-[15px] text-text-muted/60 mt-2"
             onClick={() => setTapCount((c) => c + 1)}
           >
             Your Ardsley community
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold press text-[15px] shadow-sm"
+          className="w-full flex items-center justify-center gap-3 bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold press text-[15px]"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
@@ -80,7 +80,7 @@ export default function LoginPage() {
           <button
             onClick={handleDemoLogin}
             disabled={demoLoading}
-            className="w-full mt-3 flex items-center justify-center gap-2 bg-bg-input text-text py-3.5 rounded-2xl font-semibold press text-[14px]"
+            className="w-full mt-3 flex items-center justify-center gap-2 bg-bg-input text-text py-3.5 rounded-2xl font-semibold press text-[14px] disabled:opacity-50 transition-opacity"
           >
             {demoLoading ? "Signing in..." : "Demo Login"}
           </button>

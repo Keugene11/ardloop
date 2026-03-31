@@ -17,30 +17,22 @@ export default async function UserProfilePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If viewing your own profile, could redirect, but let's just show it
   const isOwnProfile = user?.id === id;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Parallelize queries
+  const [profileResult, postsResult] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", id).single(),
+    supabase
+      .from("posts")
+      .select(`*, like_count:likes(count), comment_count:comments(count)`)
+      .eq("author_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
 
+  const profile = profileResult.data;
   if (!profile) notFound();
 
-  const { data: posts } = await supabase
-    .from("posts")
-    .select(
-      `
-      *,
-      like_count:likes(count),
-      comment_count:comments(count)
-    `
-    )
-    .eq("author_id", id)
-    .order("created_at", { ascending: false });
-
-  const formattedPosts = (posts || []).map((post) => ({
+  const formattedPosts = (postsResult.data || []).map((post) => ({
     ...post,
     like_count: post.like_count?.[0]?.count || 0,
     comment_count: post.comment_count?.[0]?.count || 0,
@@ -52,17 +44,17 @@ export default async function UserProfilePage({
   );
 
   return (
-    <div className="animate-slide-up">
+    <div className="animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="press">
+        <Link href="/" className="press p-1 -ml-1 hover:bg-bg-input rounded-full transition-colors">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </Link>
-        <h1 className="text-[18px] font-bold">Profile</h1>
+        <h1 className="text-[16px] font-semibold">Profile</h1>
       </div>
 
-      <div className="flex flex-col items-center text-center mb-6">
+      <div className="flex flex-col items-center text-center mb-8">
         {profile.avatar_url ? (
-          <div className="w-20 h-20 rounded-full overflow-hidden mb-3">
+          <div className="w-20 h-20 rounded-full overflow-hidden mb-3 ring-2 ring-border">
             <Image
               src={profile.avatar_url}
               alt={profile.full_name}
@@ -72,7 +64,7 @@ export default async function UserProfilePage({
             />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full bg-bg-input flex items-center justify-center text-[28px] font-bold text-text-muted mb-3">
+          <div className="w-20 h-20 rounded-full bg-bg-input flex items-center justify-center text-[28px] font-bold text-text-muted mb-3 ring-2 ring-border">
             {profile.full_name?.[0] || "?"}
           </div>
         )}
@@ -81,51 +73,58 @@ export default async function UserProfilePage({
           {profile.full_name || "Anonymous"}
         </h2>
 
-        <p className="text-[13px] text-text-muted mt-0.5">
+        <p className="text-[12px] text-text-muted/60 mt-0.5">
           Member since {memberSince}
         </p>
 
         {profile.bio && (
-          <p className="text-[14px] text-text-muted mt-2 max-w-[280px] leading-relaxed">
+          <p className="text-[14px] text-text-muted/80 mt-2.5 max-w-[280px] leading-relaxed">
             {profile.bio}
           </p>
         )}
 
-        {user && !isOwnProfile && (
-          <Link
-            href={`/messages/${id}`}
-            className="mt-4 flex items-center gap-2 bg-[#1a1a1a] text-white px-5 py-2.5 rounded-full text-[14px] font-semibold press"
-          >
-            <Send size={14} strokeWidth={1.5} />
-            Message
-          </Link>
-        )}
+        <div className="flex gap-3 mt-4">
+          {user && !isOwnProfile && (
+            <Link
+              href={`/messages/${id}`}
+              className="flex items-center gap-2 bg-[#1a1a1a] text-white px-5 py-2.5 rounded-full text-[14px] font-semibold press"
+            >
+              <Send size={14} strokeWidth={1.5} />
+              Message
+            </Link>
+          )}
 
-        {isOwnProfile && (
-          <Link
-            href="/profile"
-            className="mt-4 text-[13px] text-text-muted underline underline-offset-2"
-          >
-            Edit profile
-          </Link>
-        )}
+          {isOwnProfile && (
+            <Link
+              href="/profile"
+              className="text-[13px] text-text-muted/60 hover:text-text transition-colors"
+            >
+              Edit profile
+            </Link>
+          )}
+        </div>
       </div>
 
       <div>
-        <h3 className="text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-3">
-          Posts · {formattedPosts.length}
-        </h3>
-        <div className="space-y-3">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[13px] font-semibold uppercase tracking-wider text-text-muted/60">
+            Posts
+          </h3>
+          <span className="text-[12px] text-text-muted/40">{formattedPosts.length}</span>
+        </div>
+        <div className="space-y-2.5">
           {formattedPosts.length === 0 ? (
-            <p className="text-[14px] text-text-muted text-center py-10">
-              No posts yet.
-            </p>
+            <div className="text-center py-12">
+              <p className="text-[14px] text-text-muted/50">
+                No posts yet.
+              </p>
+            </div>
           ) : (
             formattedPosts.map((post) => (
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
-                className="block bg-bg-card border border-border rounded-2xl px-4 py-3.5 press hover:bg-bg-card-hover transition-colors"
+                className="block bg-bg-card border border-border/60 rounded-2xl px-4 py-3.5 press hover:bg-bg-card-hover transition-colors"
               >
                 <p className="text-[14px] leading-relaxed line-clamp-3 whitespace-pre-wrap">
                   {post.content}
@@ -138,18 +137,19 @@ export default async function UserProfilePage({
                 )}
 
                 {post.image_url && (
-                  <div className="mt-2.5 rounded-xl overflow-hidden">
+                  <div className="mt-2.5 rounded-xl overflow-hidden border border-border/30">
                     <Image
                       src={post.image_url}
                       alt="Post image"
                       width={400}
                       height={200}
                       className="w-full h-32 object-cover"
+                      sizes="(max-width: 448px) 100vw, 400px"
                     />
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 mt-2.5 text-text-muted">
+                <div className="flex items-center gap-4 mt-2.5 text-text-muted/60">
                   <span className="text-[12px]">
                     {timeAgo(post.created_at)}
                   </span>
