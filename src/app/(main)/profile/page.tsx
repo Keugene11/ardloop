@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { ProfileActions } from "@/components/profile-actions";
+import { AccountActions } from "@/components/account-actions";
 import { ServicesEditor } from "@/components/services-editor";
 import { timeAgo } from "@/lib/utils";
 import Link from "next/link";
@@ -116,6 +117,8 @@ export default async function ProfilePage() {
           )}
         </div>
       </div>
+
+      <AccountActions />
     </div>
   );
 }
