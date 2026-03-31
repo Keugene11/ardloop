@@ -42,11 +42,8 @@ export function ServicesEditor({
   const toggleService = (type: ServiceType, mode: ServiceMode) => {
     setDraft((prev) => {
       const current = prev[type];
-      if (current?.mode === mode) {
-        const next = { ...prev };
-        delete next[type];
-        return next;
-      }
+      // If same mode tapped again, do nothing — use Remove button to clear
+      if (current?.mode === mode) return prev;
       return { ...prev, [type]: { mode, details: current?.details || "" } };
     });
   };
