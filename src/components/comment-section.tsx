@@ -50,7 +50,7 @@ export function CommentSection({
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !userId || submitting) return;
+    if (!newComment.trim() || newComment.length > 2000 || !userId || submitting) return;
 
     setSubmitting(true);
     const supabase = createClient();
@@ -145,14 +145,15 @@ export function CommentSection({
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Reply..."
+            maxLength={2000}
             className="flex-1 bg-bg-input rounded-full pl-4 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:ring-1 focus:ring-text-muted/30 transition-all"
           />
           <button
             type="submit"
             disabled={!newComment.trim() || submitting}
-            className="bg-[#1a1a1a] text-white p-2.5 rounded-full press disabled:opacity-30"
+            className="bg-[#1a1a1a] text-white p-3 rounded-full press disabled:opacity-30"
           >
-            <Send size={16} strokeWidth={1.5} />
+            <Send size={18} strokeWidth={1.5} />
           </button>
         </form>
       )}

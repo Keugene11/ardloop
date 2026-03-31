@@ -6,12 +6,11 @@ const config: CapacitorConfig = {
   webDir: "out",
   server: {
     // Point to your live Vercel URL — update this if you add a custom domain
-    url: "https://ardloop.vercel.app",
+    url: "https://ardsleypost.vercel.app",
     cleartext: false,
   },
   ios: {
     contentInset: "automatic",
-    preferredContentMode: "mobile",
     scheme: "Ardsleypost",
   },
   android: {

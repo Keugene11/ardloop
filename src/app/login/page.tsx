@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-bg">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 bg-bg">
       <div className="w-full max-w-sm animate-slide-up">
         <div className="text-center mb-12">
           <h1 className="text-[42px] font-extrabold tracking-tight text-text">

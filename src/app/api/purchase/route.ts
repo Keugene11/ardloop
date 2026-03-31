@@ -14,8 +14,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { postId } = await request.json();
-  const origin = request.headers.get("origin")!;
+  let postId: string;
+  try {
+    ({ postId } = await request.json());
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  if (!postId || typeof postId !== "string") {
+    return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
+  }
+
+  const origin = request.headers.get("origin") || "";
 
   // Get the post and seller info
   const { data: post } = await supabase

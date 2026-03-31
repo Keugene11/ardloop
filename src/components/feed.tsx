@@ -125,8 +125,8 @@ export function Feed({
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      p.content.toLowerCase().includes(q) ||
-      p.author.full_name.toLowerCase().includes(q)
+      p.content?.toLowerCase().includes(q) ||
+      p.author?.full_name?.toLowerCase().includes(q)
     );
   });
 
@@ -178,9 +178,9 @@ export function Feed({
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center press"
+                    className="absolute top-1.5 right-1.5 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center press"
                   >
-                    <X size={14} strokeWidth={2} className="text-white" />
+                    <X size={16} strokeWidth={2} className="text-white" />
                   </button>
                 </div>
               )}

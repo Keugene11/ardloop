@@ -11,7 +11,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { full_name } = await request.json();
+  let full_name: string;
+  try {
+    ({ full_name } = await request.json());
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
 
   if (!full_name || typeof full_name !== "string" || !full_name.trim()) {
     return NextResponse.json(

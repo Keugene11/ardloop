@@ -88,20 +88,24 @@ export function ProfileActions({
     }
 
     setUploadingAvatar(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res = await fetch("/api/profile/avatar", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
 
-    if (res.ok) {
-      setAvatarPreview(data.avatar_url);
-      router.refresh();
-    } else {
-      alert(data.error || "Failed to upload");
+      if (res.ok) {
+        setAvatarPreview(data.avatar_url);
+        router.refresh();
+      } else {
+        alert(data.error || "Failed to upload");
+      }
+    } catch {
+      alert("Network error. Please try again.");
     }
     setUploadingAvatar(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -206,6 +210,7 @@ export function ProfileActions({
             onChange={(e) => setBioValue(e.target.value)}
             placeholder={"Describe yourself to the Ardsley community.\n\nFor example:\n• Math & science tutor, grades 6-12\n• 3 years experience, $30/hr\n• Available weekends"}
             autoFocus
+            maxLength={500}
             className="w-full bg-bg-input rounded-xl p-3.5 text-[14px] leading-relaxed placeholder:text-text-muted/40 outline-none resize-none min-h-[130px] focus:ring-1 focus:ring-text-muted/30 transition-all"
           />
           <div className="flex gap-2 mt-2">

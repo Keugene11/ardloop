@@ -52,7 +52,7 @@ export function ChatView({
               .from("messages")
               .update({ read: true })
               .eq("id", msg.id)
-              .then();
+              .then(() => {}, () => {});
           }
         }
       )
@@ -88,7 +88,7 @@ export function ChatView({
   };
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 180px)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100dvh - 180px)" }}>
       <div className="flex-1 space-y-1.5 overflow-y-auto px-1 pb-4">
         {messages.length === 0 && (
           <p className="text-center text-text-muted text-[14px] py-12">
@@ -130,14 +130,15 @@ export function ChatView({
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Message..."
+          maxLength={5000}
           className="flex-1 bg-bg-input rounded-full pl-4 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:ring-1 focus:ring-text-muted/30 transition-all"
         />
         <button
           type="submit"
           disabled={!newMessage.trim() || sending}
-          className="bg-[#1a1a1a] text-white p-2.5 rounded-full press disabled:opacity-30"
+          className="bg-[#1a1a1a] text-white p-3 rounded-full press disabled:opacity-30"
         >
-          <Send size={16} strokeWidth={1.5} />
+          <Send size={18} strokeWidth={1.5} />
         </button>
       </form>
     </div>

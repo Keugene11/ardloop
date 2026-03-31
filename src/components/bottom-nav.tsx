@@ -10,7 +10,7 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
   if (!isLoggedIn) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-bg/80 backdrop-blur-lg border-t border-border/50 z-50">
-        <div className="max-w-md mx-auto flex items-center justify-around py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="max-w-md md:max-w-2xl mx-auto flex items-center justify-around py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <NavLink href="/" icon={Home} label="Feed" active={pathname === "/"} />
           <NavLink href="/login" icon={LogIn} label="Sign in" active={false} />
         </div>
@@ -20,7 +20,7 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-bg/80 backdrop-blur-lg border-t border-border/50 z-50">
-      <div className="max-w-md mx-auto flex items-center justify-around py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="max-w-md md:max-w-2xl mx-auto flex items-center justify-around py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         <NavLink href="/" icon={Home} label="Feed" active={pathname === "/"} />
         <NavLink href="/messages" icon={MessageCircle} label="Messages" active={pathname.startsWith("/messages")} />
         <NavLink href="/profile" icon={User} label="Profile" active={pathname.startsWith("/profile")} />

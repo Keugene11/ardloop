@@ -15,18 +15,23 @@ export function BuyButton({
     if (!sellerOnboarded) return;
     setLoading(true);
 
-    const res = await fetch("/api/purchase", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ postId }),
-    });
+    try {
+      const res = await fetch("/api/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert(data.error || "Something went wrong");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Something went wrong");
+        setLoading(false);
+      }
+    } catch {
+      alert("Network error. Please try again.");
       setLoading(false);
     }
   };
