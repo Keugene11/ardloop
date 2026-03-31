@@ -85,10 +85,6 @@ export default function LoginPage() {
             {demoLoading ? "Signing in..." : "Demo Login"}
           </button>
         )}
-
-        <p className="text-[12px] text-text-muted/60 text-center mt-8">
-          By signing in, you agree to be a good neighbor.
-        </p>
       </div>
     </div>
   );
