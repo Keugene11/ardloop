@@ -145,17 +145,13 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
       <div
         className="absolute inset-0 bg-black/40 animate-fade-in"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-md bg-bg rounded-t-3xl px-6 pt-3 pb-[max(2rem,env(safe-area-inset-bottom))] animate-slide-up z-10 max-h-[90dvh] overflow-y-auto">
-        {/* Handle */}
-        <div className="flex justify-center mb-2">
-          <div className="w-10 h-1 rounded-full bg-border" />
-        </div>
+      <div className="relative w-full max-w-sm bg-bg rounded-2xl px-6 pt-5 pb-6 animate-fade-in z-10 max-h-[85dvh] overflow-y-auto shadow-xl border border-border">
 
         <button
           onClick={step === "email" ? () => { setStep("main"); setEmailError(""); setEmailSuccess(""); } : onClose}
