@@ -8,7 +8,7 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
 
   // Run all independent queries in parallel
-  const [postsResult, userCountResult, ...userResults] = await Promise.all([
+  const [postsResult, userCountResult] = await Promise.all([
     supabase
       .from("posts")
       .select(
@@ -24,20 +24,25 @@ export default async function HomePage() {
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true }),
-    ...(user
-      ? [
-          supabase.from("likes").select("post_id").eq("user_id", user.id),
-          supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-          supabase.from("profiles").select("avatar_url, full_name").eq("id", user.id).single(),
-        ]
-      : []),
   ]);
 
   const posts = postsResult.data;
   const userCount = userCountResult.count;
-  const likedPostIds = new Set(user ? (userResults[0]?.data?.map((l: { post_id: string }) => l.post_id) || []) : []);
-  const blockedUserIds = new Set(user ? (userResults[1]?.data?.map((b: { blocked_id: string }) => b.blocked_id) || []) : []);
-  const userProfile = user ? userResults[2]?.data : null;
+
+  let likedPostIds = new Set<string>();
+  let blockedUserIds = new Set<string>();
+  let userProfile: { avatar_url: string | null; full_name: string } | null = null;
+
+  if (user) {
+    const [likesResult, blocksResult, profileResult] = await Promise.all([
+      supabase.from("likes").select("post_id").eq("user_id", user.id),
+      supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+      supabase.from("profiles").select("avatar_url, full_name").eq("id", user.id).single(),
+    ]);
+    likedPostIds = new Set(likesResult.data?.map((l) => l.post_id) || []);
+    blockedUserIds = new Set(blocksResult.data?.map((b) => b.blocked_id) || []);
+    userProfile = profileResult.data;
+  }
 
   const postIds = (posts || []).map((p) => p.id);
 
