@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, ImagePlus, X } from "lucide-react";
@@ -114,6 +114,7 @@ export function Feed({
         },
         like_count: 0,
         comment_count: 0,
+        impression_count: 0,
         user_has_liked: false,
         recent_comments: [],
       };
@@ -162,6 +163,37 @@ export function Feed({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Track post impressions
+  const seenPostIds = useRef(new Set<string>());
+  const impressionTimer = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const flushImpressions = useCallback(() => {
+    if (seenPostIds.current.size === 0) return;
+    const ids = Array.from(seenPostIds.current);
+    seenPostIds.current.clear();
+    fetch("/api/posts/impression", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ post_ids: ids }),
+    }).catch(() => {});
+  }, []);
+
+  const trackImpression = useCallback(
+    (postId: string) => {
+      if (seenPostIds.current.has(postId)) return;
+      seenPostIds.current.add(postId);
+      if (impressionTimer.current) clearTimeout(impressionTimer.current);
+      impressionTimer.current = setTimeout(flushImpressions, 2000);
+    },
+    [flushImpressions]
+  );
+
+  useEffect(() => {
+    return () => {
+      flushImpressions();
+    };
+  }, [flushImpressions]);
 
   const filtered = posts.filter((p) => {
     if (!search) return true;
@@ -332,7 +364,7 @@ export function Feed({
           </div>
         ) : (
           filtered.map((post) => (
-            <PostCard key={post.id} post={post} userId={userId} />
+            <PostCard key={post.id} post={post} userId={userId} onVisible={trackImpression} />
           ))
         )}
       </div>

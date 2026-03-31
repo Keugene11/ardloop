@@ -60,6 +60,7 @@ export interface Post {
   author: Profile;
   like_count: number;
   comment_count: number;
+  impression_count: number;
   user_has_liked: boolean;
   recent_comments: Comment[];
 }

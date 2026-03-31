@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Send } from "lucide-react";
+import { Heart, Send, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { timeAgo } from "@/lib/utils";
 import type { Comment } from "@/types";
@@ -14,18 +14,29 @@ export function CommentSection({
   initialComments,
   likeCount: initialLikeCount,
   userHasLiked: initialHasLiked,
+  impressionCount: initialImpressionCount,
 }: {
   postId: string;
   userId: string | null;
   initialComments: Comment[];
   likeCount: number;
   userHasLiked: boolean;
+  impressionCount: number;
 }) {
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [liked, setLiked] = useState(initialHasLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
+
+  // Record impression on mount
+  useEffect(() => {
+    fetch("/api/posts/impression", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ post_ids: [postId] }),
+    }).catch(() => {});
+  }, [postId]);
 
   const handleLike = async () => {
     if (!userId) return;
@@ -90,6 +101,10 @@ export function CommentSection({
         </button>
         <span className="text-[13px] text-text-muted">
           {comments.length} {comments.length === 1 ? "reply" : "replies"}
+        </span>
+        <span className="flex items-center gap-1 text-[13px] text-text-muted">
+          <Eye size={15} strokeWidth={1.5} />
+          {initialImpressionCount > 0 && initialImpressionCount}
         </span>
       </div>
 

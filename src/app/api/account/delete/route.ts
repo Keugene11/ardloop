@@ -25,6 +25,9 @@ export async function POST() {
   await supabaseAdmin.from("messages").delete().eq("receiver_id", user.id);
   await supabaseAdmin.from("likes").delete().eq("user_id", user.id);
   await supabaseAdmin.from("comments").delete().eq("author_id", user.id);
+  await supabaseAdmin.from("post_impressions").delete().eq("viewer_id", user.id);
+  await supabaseAdmin.from("profile_views").delete().eq("viewer_id", user.id);
+  await supabaseAdmin.from("profile_views").delete().eq("profile_id", user.id);
 
   // Delete comments and likes on user's posts before deleting posts
   const { data: userPosts } = await supabaseAdmin
@@ -36,6 +39,7 @@ export async function POST() {
     const postIds = userPosts.map((p) => p.id);
     await supabaseAdmin.from("comments").delete().in("post_id", postIds);
     await supabaseAdmin.from("likes").delete().in("post_id", postIds);
+    await supabaseAdmin.from("post_impressions").delete().in("post_id", postIds);
     await supabaseAdmin.from("purchases").delete().in("post_id", postIds);
   }
 

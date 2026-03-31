@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ProfileActions } from "@/components/profile-actions";
 import { AccountActions } from "@/components/account-actions";
 import { ServicesEditor } from "@/components/services-editor";
+import { ProfileViewers } from "@/components/profile-viewers";
 import { timeAgo } from "@/lib/utils";
 import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
@@ -17,7 +18,7 @@ export default async function ProfilePage() {
 
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: posts }] = await Promise.all([
+  const [{ data: profile }, { data: posts }, { data: profileViews }, { count: viewCount }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("posts")
@@ -30,7 +31,24 @@ export default async function ProfilePage() {
       )
       .eq("author_id", user.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("profile_views")
+      .select("created_at, viewer:profiles!viewer_id(id, full_name, avatar_url)")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("profile_views")
+      .select("*", { count: "exact", head: true })
+      .eq("profile_id", user.id),
   ]);
+
+  const viewers = (profileViews || []).map((v: any) => ({
+    id: v.viewer.id,
+    full_name: v.viewer.full_name,
+    avatar_url: v.viewer.avatar_url,
+    viewed_at: v.created_at,
+  }));
 
   const formattedPosts = (posts || []).map((post) => ({
     ...post,
@@ -54,6 +72,8 @@ export default async function ProfilePage() {
         services={(profile?.services as Services) || {}}
         servicesPaused={profile?.services_paused || false}
       />
+
+      <ProfileViewers viewers={viewers} totalCount={viewCount || 0} />
 
       <div className="mt-8">
         <h3 className="text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-3">

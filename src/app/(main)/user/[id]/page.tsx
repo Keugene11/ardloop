@@ -6,6 +6,7 @@ import { ArrowLeft, Send, Heart, MessageCircle } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { ServicesDisplay } from "@/components/services-display";
 import { UserActions } from "@/components/user-actions";
+import { ProfileViewTracker } from "@/components/profile-view-tracker";
 import type { Services, UserRole } from "@/types";
 import { ROLE_LABELS } from "@/types";
 
@@ -58,6 +59,7 @@ export default async function UserProfilePage({
 
   return (
     <div className="animate-slide-up">
+      {user && !isOwnProfile && <ProfileViewTracker profileId={id} />}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/" className="press">
           <ArrowLeft size={20} strokeWidth={1.5} />

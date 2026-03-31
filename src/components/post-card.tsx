@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, Send, Trash2, Flag, Pencil, Check, X } from "lucide-react";
+import { Heart, MessageCircle, Send, Trash2, Flag, Pencil, Check, X, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post } from "@/types";
 import { timeAgo } from "@/lib/utils";
@@ -13,10 +13,28 @@ import { ReportModal } from "./report-modal";
 export function PostCard({
   post,
   userId,
+  onVisible,
 }: {
   post: Post;
   userId: string | null;
+  onVisible?: (postId: string) => void;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!onVisible || !cardRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onVisible(post.id);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [post.id, onVisible]);
   const [liked, setLiked] = useState(post.user_has_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [deleted, setDeleted] = useState(false);
@@ -107,7 +125,7 @@ export function PostCard({
 
   return (
     <>
-      <article className="flex gap-3 py-3.5 cursor-pointer" onClick={handleCardClick}>
+      <article ref={cardRef} className="flex gap-3 py-3.5 cursor-pointer" onClick={handleCardClick}>
         <Link
           href={`/user/${post.author_id}`}
           className="shrink-0 mt-0.5"
@@ -209,6 +227,10 @@ export function PostCard({
             <span className="flex items-center gap-1 text-[13px] text-text-muted">
               <MessageCircle size={15} strokeWidth={1.5} />
               {post.comment_count > 0 && post.comment_count}
+            </span>
+            <span className="flex items-center gap-1 text-[13px] text-text-muted">
+              <Eye size={15} strokeWidth={1.5} />
+              {post.impression_count > 0 && post.impression_count}
             </span>
             {userId && userId !== post.author_id && (
               <span className="flex items-center gap-3 ml-auto">
