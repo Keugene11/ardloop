@@ -9,6 +9,14 @@ export default function LoginPage() {
   const [demo2Loading, setDemo2Loading] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const [showApple, setShowApple] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [emailSuccess, setEmailSuccess] = useState("");
   const showDemo = tapCount >= 5;
 
   useEffect(() => {
@@ -48,6 +56,58 @@ export default function LoginPage() {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError("");
+    setEmailSuccess("");
+    setEmailLoading(true);
+
+    const supabase = createClient();
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { full_name: fullName },
+        },
+      });
+      setEmailLoading(false);
+      if (error) {
+        setEmailError(error.message);
+      } else {
+        setEmailSuccess("Check your email to confirm your account.");
+      }
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      setEmailLoading(false);
+      if (error) {
+        setEmailError(error.message);
+      } else {
+        // Ensure profile exists for email/password users
+        if (data.user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", data.user.id)
+            .single();
+          if (!profile) {
+            await supabase.from("profiles").insert({
+              id: data.user.id,
+              email: data.user.email,
+              full_name: data.user.user_metadata.full_name || "",
+            });
+          }
+        }
+        window.location.href = "/";
+      }
+    }
   };
 
   const handleDemoLogin = async (endpoint: string, setLoading: (v: boolean) => void) => {
@@ -118,6 +178,86 @@ export default function LoginPage() {
             </svg>
             Continue with Apple
           </button>
+        )}
+
+        <div className="flex items-center gap-3 mt-5 mb-5">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-[12px] text-text-muted">or</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {!showEmail ? (
+          <button
+            onClick={() => setShowEmail(true)}
+            className="w-full flex items-center justify-center gap-2 border border-border bg-bg-card text-text py-4 rounded-2xl font-semibold press text-[15px] shadow-sm"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Continue with Email
+          </button>
+        ) : (
+          <form onSubmit={handleEmailAuth} className="space-y-3">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="w-full bg-bg-card border border-border rounded-xl px-4 py-3 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+              />
+            )}
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full bg-bg-card border border-border rounded-xl px-4 py-3 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="w-full bg-bg-card border border-border rounded-xl px-4 py-3 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+            />
+            {emailError && (
+              <p className="text-[13px] text-red-500">{emailError}</p>
+            )}
+            {emailSuccess && (
+              <p className="text-[13px] text-green-600">{emailSuccess}</p>
+            )}
+            <button
+              type="submit"
+              disabled={emailLoading}
+              className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold press text-[15px]"
+            >
+              {emailLoading
+                ? "Loading..."
+                : isSignUp
+                  ? "Create Account"
+                  : "Sign In"}
+            </button>
+            <p className="text-center text-[13px] text-text-muted">
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setEmailError("");
+                  setEmailSuccess("");
+                }}
+                className="text-text font-semibold underline underline-offset-2"
+              >
+                {isSignUp ? "Sign in" : "Sign up"}
+              </button>
+            </p>
+          </form>
         )}
 
         <div className="flex items-center justify-center gap-3 mt-6 text-[12px] text-text-muted">
