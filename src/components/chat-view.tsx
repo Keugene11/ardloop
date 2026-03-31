@@ -104,28 +104,39 @@ export function ChatView({
             Start the conversation
           </p>
         )}
-        {messages.map((msg) => {
+        {messages.map((msg, i) => {
           const isMine = msg.sender_id === currentUserId;
+          const prev = messages[i - 1];
+          const next = messages[i + 1];
+          const sameSenderPrev = prev?.sender_id === msg.sender_id;
+          const sameSenderNext = next?.sender_id === msg.sender_id;
+
+          // Show time if first message, different sender, or 5+ min gap
+          const showTime = !sameSenderPrev ||
+            (prev && new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() > 5 * 60 * 1000);
+
           return (
             <div
               key={msg.id}
-              className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+              className={`flex flex-col ${isMine ? "items-end" : "items-start"} ${sameSenderPrev && !showTime ? "" : "mt-3"}`}
             >
+              {showTime && (
+                <p className="text-[10px] text-text-muted/50 mb-1 px-1">
+                  {timeAgo(msg.created_at)}
+                </p>
+              )}
               <div
-                className={`max-w-[80%] px-3.5 py-2 text-[14px] leading-snug ${
+                className={`max-w-[75%] px-3.5 py-2 text-[15px] leading-relaxed ${
                   isMine
-                    ? "bg-[#1a1a1a] text-white rounded-2xl rounded-br-sm"
-                    : "bg-bg-input rounded-2xl rounded-bl-sm"
+                    ? `bg-[#1a1a1a] text-white ${
+                        sameSenderNext && !showTime ? "rounded-2xl rounded-br-md" : "rounded-2xl rounded-br-sm"
+                      } ${sameSenderPrev && !showTime ? "rounded-tr-md" : ""}`
+                    : `bg-bg-input ${
+                        sameSenderNext && !showTime ? "rounded-2xl rounded-bl-md" : "rounded-2xl rounded-bl-sm"
+                      } ${sameSenderPrev && !showTime ? "rounded-tl-md" : ""}`
                 }`}
               >
                 <p>{msg.content}</p>
-                <p
-                  className={`text-[10px] mt-0.5 ${
-                    isMine ? "text-white/40" : "text-text-muted/60"
-                  }`}
-                >
-                  {timeAgo(msg.created_at)}
-                </p>
               </div>
             </div>
           );
