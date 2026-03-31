@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut, Camera, Check, X } from "lucide-react";
+import { LogOut, Camera, Check, X, Pencil } from "lucide-react";
 
 export function ProfileActions({
   userId,
@@ -230,12 +230,15 @@ export function ProfileActions({
       ) : (
         <button
           onClick={() => setEditingBio(true)}
-          className="w-full text-left mb-5 press rounded-xl transition-colors"
+          className="w-full text-left mb-5 press rounded-xl transition-colors group"
         >
           {bio ? (
-            <p className="text-[14px] leading-relaxed whitespace-pre-wrap">
-              {bio}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[14px] leading-relaxed whitespace-pre-wrap">
+                {bio}
+              </p>
+              <Pencil size={14} strokeWidth={1.5} className="text-text-muted/40 shrink-0 mt-0.5" />
+            </div>
           ) : (
             <div className="bg-bg-input/50 border border-dashed border-border rounded-xl px-4 py-4">
               <p className="text-[14px] text-text-muted/60 font-medium">
