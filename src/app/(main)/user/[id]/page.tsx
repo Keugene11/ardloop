@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Send, Heart, MessageCircle } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
+import { ServicesDisplay } from "@/components/services-display";
+import type { Services } from "@/types";
 
 export default async function UserProfilePage({
   params,
@@ -108,6 +110,10 @@ export default async function UserProfilePage({
           >
             Edit profile
           </Link>
+        )}
+
+        {profile.services && (
+          <ServicesDisplay services={profile.services as Services} />
         )}
       </div>
 

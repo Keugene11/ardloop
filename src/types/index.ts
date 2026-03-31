@@ -1,9 +1,28 @@
+export const SERVICE_TYPES = ["tutoring", "driving", "babysitting", "pet_watching"] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+export type ServiceMode = "offering" | "looking";
+
+export interface ServiceEntry {
+  mode: ServiceMode;
+  details: string;
+}
+
+export type Services = Partial<Record<ServiceType, ServiceEntry>>;
+
+export const SERVICE_LABELS: Record<ServiceType, string> = {
+  tutoring: "Tutoring",
+  driving: "Driving",
+  babysitting: "Babysitting",
+  pet_watching: "Pet Watching",
+};
+
 export interface Profile {
   id: string;
   email: string;
   full_name: string;
   avatar_url: string | null;
   bio: string | null;
+  services: Services | null;
   stripe_account_id: string | null;
   stripe_onboarded: boolean;
   created_at: string;

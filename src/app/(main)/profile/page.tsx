@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { ProfileActions } from "@/components/profile-actions";
+import { ServicesEditor } from "@/components/services-editor";
 import { timeAgo } from "@/lib/utils";
 import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
+import type { Services } from "@/types";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -46,6 +48,11 @@ export default async function ProfilePage() {
         avatarUrl={profile?.avatar_url || null}
         email={profile?.email || ""}
         bio={profile?.bio || ""}
+      />
+
+      <ServicesEditor
+        userId={user.id}
+        services={(profile?.services as Services) || {}}
       />
 
       <div className="mt-8">
