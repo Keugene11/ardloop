@@ -24,8 +24,6 @@ export function ServicesEditor({
   const [paused, setPaused] = useState(initialPaused);
   const [togglingPause, setTogglingPause] = useState(false);
 
-  const hasAny = Object.values(initialServices).some((s) => s);
-
   const handleTogglePause = async () => {
     setTogglingPause(true);
     const newVal = !paused;
@@ -113,29 +111,12 @@ export function ServicesEditor({
           </span>
         </button>
 
-        {hasAny ? (
-          <div className={`space-y-2 ${paused ? "opacity-40" : ""}`}>
-            {SERVICE_TYPES.map((type) => {
-              const entry = initialServices[type];
-              if (!entry) return null;
-              return <ServiceBadge key={type} type={type} entry={entry} />;
-            })}
-          </div>
-        ) : (
-          <button
-            onClick={() => setEditing(true)}
-            className="w-full text-left press"
-          >
-            <div className="bg-bg-input/50 border border-dashed border-border rounded-xl px-4 py-4">
-              <p className="text-[14px] text-text-muted/60 font-medium">
-                Tap to add services
-              </p>
-              <p className="text-[12px] text-text-muted/40 mt-0.5">
-                Let people know what you offer or need — tutoring, driving, babysitting, and more.
-              </p>
-            </div>
-          </button>
-        )}
+        <div className={`space-y-2 ${paused ? "opacity-40" : ""}`}>
+          {SERVICE_TYPES.map((type) => {
+            const entry = initialServices[type];
+            return <ServiceBadge key={type} type={type} entry={entry || null} onEdit={() => setEditing(true)} />;
+          })}
+        </div>
       </div>
     );
   }
@@ -295,7 +276,20 @@ export function ServicesEditor({
   );
 }
 
-function ServiceBadge({ type, entry }: { type: ServiceType; entry: ServiceEntry }) {
+function ServiceBadge({ type, entry, onEdit }: { type: ServiceType; entry: ServiceEntry | null; onEdit: () => void }) {
+  if (!entry) {
+    return (
+      <button
+        type="button"
+        onClick={onEdit}
+        className="w-full rounded-2xl px-4 py-3 flex items-center gap-3 bg-bg-input/30 border border-dashed border-border press"
+      >
+        <span className="text-[16px] opacity-40">{SERVICE_ICONS[type]}</span>
+        <span className="text-[14px] font-medium text-text-muted/50">{SERVICE_LABELS[type]}</span>
+      </button>
+    );
+  }
+
   const isOffering = entry.mode === "offering";
   return (
     <div
