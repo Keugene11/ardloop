@@ -19,12 +19,17 @@ export function PostCard({
   const [liked, setLiked] = useState(post.user_has_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [deleted, setDeleted] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const router = useRouter();
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm("Delete this post?")) return;
+
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
 
     const supabase = createClient();
     await supabase.from("comments").delete().eq("post_id", post.id);
@@ -32,6 +37,12 @@ export function PostCard({
     await supabase.from("posts").delete().eq("id", post.id).eq("author_id", userId);
     setDeleted(true);
     router.refresh();
+  };
+
+  const cancelDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfirmingDelete(false);
   };
 
   if (deleted) return null;
@@ -141,12 +152,29 @@ export function PostCard({
               </Link>
             )}
             {userId && userId === post.author_id && (
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-1 text-[13px] text-text-muted hover:text-red-500 press ml-auto"
-              >
-                <Trash2 size={14} strokeWidth={1.5} />
-              </button>
+              confirmingDelete ? (
+                <span className="flex items-center gap-2 ml-auto">
+                  <button
+                    onClick={handleDelete}
+                    className="text-[12px] text-red-500 font-semibold press"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={cancelDelete}
+                    className="text-[12px] text-text-muted press"
+                  >
+                    Cancel
+                  </button>
+                </span>
+              ) : (
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1 text-[13px] text-text-muted hover:text-red-500 press ml-auto"
+                >
+                  <Trash2 size={14} strokeWidth={1.5} />
+                </button>
+              )
             )}
           </div>
 
