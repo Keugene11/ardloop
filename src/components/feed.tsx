@@ -132,61 +132,11 @@ export function Feed({
 
   return (
     <div>
-      {/* Search */}
-      <div className="relative mb-3" ref={searchRef}>
-        <Search
-          size={15}
-          strokeWidth={1.5}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/40 z-10"
-        />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => {
-            if (userResults.length > 0) setShowUserResults(true);
-          }}
-          placeholder="Search posts and people..."
-          className="w-full bg-bg-input/70 border border-transparent focus:border-border rounded-full pl-9 pr-4 py-2.5 text-[13px] placeholder:text-text-muted/40 outline-none transition-all"
-        />
-        {showUserResults && (
-          <div className="absolute top-full left-0 right-0 mt-1.5 bg-bg-card border border-border rounded-2xl shadow-lg overflow-hidden z-50 animate-fade-in">
-            <p className="px-4 pt-3 pb-1.5 text-[10px] uppercase tracking-wider text-text-muted/60 font-semibold">
-              People
-            </p>
-            {userResults.map((u) => (
-              <Link
-                key={u.id}
-                href={`/user/${u.id}`}
-                onClick={() => setShowUserResults(false)}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-bg-card-hover transition-colors press"
-              >
-                {u.avatar_url ? (
-                  <Image
-                    src={u.avatar_url}
-                    alt={u.full_name}
-                    width={36}
-                    height={36}
-                    className="w-9 h-9 rounded-full object-cover ring-1 ring-border"
-                  />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted ring-1 ring-border">
-                    {u.full_name?.[0] || "?"}
-                  </div>
-                )}
-                <span className="text-[14px] font-medium">{u.full_name}</span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Composer */}
       {userId && (
-        <div className="border-b border-border pb-4 mb-1">
+        <div className="border-b border-border pb-3 mb-1">
           <div className="flex gap-3">
             {userAvatarUrl ? (
-              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5 ring-1 ring-border">
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5">
                 <Image
                   src={userAvatarUrl}
                   alt={userFullName || "You"}
@@ -216,7 +166,7 @@ export function Feed({
 
               {imagePreview && (
                 <div className="relative mt-2">
-                  <div className="rounded-xl overflow-hidden border border-border/50">
+                  <div className="rounded-xl overflow-hidden">
                     <Image
                       src={imagePreview}
                       alt="Selected image"
@@ -247,42 +197,85 @@ export function Feed({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-text-muted/40 hover:text-text-muted transition-colors press"
+                    className="text-text-muted/50 press"
                   >
                     <ImagePlus size={18} strokeWidth={1.5} />
                   </button>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  {content.length > 4500 && (
-                    <span
-                      className={`text-[11px] tabular-nums ${
-                        content.length > 5000 ? "text-red-500 font-semibold" : "text-text-muted/60"
-                      }`}
-                    >
-                      {content.length}/5000
-                    </span>
-                  )}
-                  <button
-                    onClick={handlePost}
-                    disabled={!content.trim() || content.length > 5000 || posting}
-                    className="bg-[#1a1a1a] text-white px-4 py-1.5 rounded-full font-semibold text-[13px] press disabled:opacity-30 transition-opacity"
+                {content.length > 4500 && (
+                  <span
+                    className={`text-[12px] ${
+                      content.length > 5000 ? "text-red-500 font-semibold" : "text-text-muted"
+                    }`}
                   >
-                    {posting ? "Posting..." : "Post"}
-                  </button>
-                </div>
+                    {content.length}/5000
+                  </span>
+                )}
+                <button
+                  onClick={handlePost}
+                  disabled={!content.trim() || content.length > 5000 || posting}
+                  className="bg-[#1a1a1a] text-white px-4 py-1.5 rounded-full font-semibold text-[13px] press disabled:opacity-30"
+                >
+                  {posting ? "Posting..." : "Post"}
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Posts */}
-      <div className="divide-y divide-border/60">
-        {filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-text-muted/60 text-[14px]">
-              {search ? "No results found." : "No posts yet. Be the first to share something."}
+      <div className="relative mb-2 mt-2" ref={searchRef}>
+        <Search
+          size={15}
+          strokeWidth={1.5}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/50 z-10"
+        />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => {
+            if (userResults.length > 0) setShowUserResults(true);
+          }}
+          placeholder="Search posts and people..."
+          className="w-full bg-bg-input rounded-full pl-9 pr-4 py-2 text-[13px] placeholder:text-text-muted/40 outline-none focus:ring-1 focus:ring-text-muted/30 transition-all"
+        />
+        {showUserResults && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-bg-card border border-border rounded-2xl shadow-lg overflow-hidden z-50 animate-fade-in">
+            <p className="px-4 pt-2.5 pb-1.5 text-[10px] uppercase tracking-wide text-text-muted font-semibold">
+              People
             </p>
+            {userResults.map((u) => (
+              <Link
+                key={u.id}
+                href={`/user/${u.id}`}
+                onClick={() => setShowUserResults(false)}
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-bg-card-hover transition-colors press"
+              >
+                {u.avatar_url ? (
+                  <Image
+                    src={u.avatar_url}
+                    alt={u.full_name}
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-bg-input flex items-center justify-center text-[12px] font-semibold text-text-muted">
+                    {u.full_name?.[0] || "?"}
+                  </div>
+                )}
+                <span className="text-[14px] font-medium">{u.full_name}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="divide-y divide-border">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-text-muted text-[14px]">
+            {search ? "No results." : "No posts yet."}
           </div>
         ) : (
           filtered.map((post) => (

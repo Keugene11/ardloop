@@ -27,10 +27,8 @@ export function PostCard({
     if (!confirm("Delete this post?")) return;
 
     const supabase = createClient();
-    await Promise.all([
-      supabase.from("comments").delete().eq("post_id", post.id),
-      supabase.from("likes").delete().eq("post_id", post.id),
-    ]);
+    await supabase.from("comments").delete().eq("post_id", post.id);
+    await supabase.from("likes").delete().eq("post_id", post.id);
     await supabase.from("posts").delete().eq("id", post.id).eq("author_id", userId);
     setDeleted(true);
     router.refresh();
@@ -42,50 +40,51 @@ export function PostCard({
     e.preventDefault();
     if (!userId) return;
 
-    // Optimistic update
-    const wasLiked = liked;
-    setLiked(!wasLiked);
-    setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
-
     const supabase = createClient();
-    const { error } = wasLiked
-      ? await supabase.from("likes").delete().eq("post_id", post.id).eq("user_id", userId)
-      : await supabase.from("likes").insert({ post_id: post.id, user_id: userId });
-
-    // Revert on error
-    if (error) {
-      setLiked(wasLiked);
-      setLikeCount((c) => (wasLiked ? c + 1 : c - 1));
+    if (liked) {
+      await supabase
+        .from("likes")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("user_id", userId);
+      setLiked(false);
+      setLikeCount((c) => c - 1);
+    } else {
+      await supabase
+        .from("likes")
+        .insert({ post_id: post.id, user_id: userId });
+      setLiked(true);
+      setLikeCount((c) => c + 1);
     }
   };
 
   return (
-    <Link href={`/post/${post.id}`} className="block">
-      <article className="flex gap-3 py-4 group">
+    <Link href={`/post/${post.id}`}>
+      <article className="flex gap-3 py-3.5">
         <Link
           href={`/user/${post.author_id}`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0"
+          className="shrink-0 mt-0.5"
         >
           {post.author.avatar_url ? (
-            <div className="w-10 h-10 rounded-full overflow-hidden ring-1 ring-border">
+            <div className="w-9 h-9 rounded-full overflow-hidden">
               <Image
                 src={post.author.avatar_url}
                 alt={post.author.full_name}
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="w-full h-full object-cover"
               />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-bg-input flex items-center justify-center text-[14px] font-semibold text-text-muted ring-1 ring-border">
+            <div className="w-9 h-9 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-semibold text-text-muted">
               {post.author.full_name?.[0] || "?"}
             </div>
           )}
         </Link>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-2">
             <Link
               href={`/user/${post.author_id}`}
               onClick={(e) => e.stopPropagation()}
@@ -93,70 +92,89 @@ export function PostCard({
             >
               {post.author.full_name}
             </Link>
-            <span className="text-[12px] text-text-muted/70 shrink-0">
+            <span className="text-[12px] text-text-muted shrink-0">
               {timeAgo(post.created_at)}
             </span>
           </div>
 
-          <p className="text-[15px] leading-relaxed mt-1 whitespace-pre-wrap">
+          <p className="text-[14px] leading-relaxed mt-0.5 whitespace-pre-wrap">
             {post.content}
           </p>
 
           {post.image_url && (
-            <div className="mt-3 rounded-xl overflow-hidden border border-border/50">
+            <div className="mt-2.5 rounded-xl overflow-hidden">
               <Image
                 src={post.image_url}
                 alt="Post image"
                 width={400}
                 height={300}
                 className="w-full object-cover"
-                sizes="(max-width: 448px) 100vw, 400px"
               />
             </div>
           )}
 
-          <div className="flex items-center gap-6 mt-3">
+          <div className="flex items-center gap-5 mt-2.5">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1.5 text-[13px] press transition-colors ${
-                liked ? "text-red-500" : "text-text-muted/60 hover:text-red-400"
+              className={`flex items-center gap-1 text-[13px] press ${
+                liked ? "text-red-500" : "text-text-muted"
               }`}
             >
               <Heart
-                size={16}
+                size={15}
                 fill={liked ? "currentColor" : "none"}
                 strokeWidth={1.5}
-                className={liked ? "animate-[scale-pop_0.2s_ease-out]" : ""}
               />
-              {likeCount > 0 && <span>{likeCount}</span>}
+              {likeCount > 0 && likeCount}
             </button>
-            <span className="flex items-center gap-1.5 text-[13px] text-text-muted/60">
-              <MessageCircle size={16} strokeWidth={1.5} />
-              {post.comment_count > 0 && <span>{post.comment_count}</span>}
+            <span className="flex items-center gap-1 text-[13px] text-text-muted">
+              <MessageCircle size={15} strokeWidth={1.5} />
+              {post.comment_count > 0 && post.comment_count}
             </span>
             {userId && userId !== post.author_id && (
               <Link
                 href={`/messages/${post.author_id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-[13px] text-text-muted/60 hover:text-text press ml-auto"
+                className="flex items-center gap-1 text-[13px] text-text-muted press ml-auto"
               >
-                <Send size={15} strokeWidth={1.5} />
+                <Send size={14} strokeWidth={1.5} />
               </Link>
             )}
             {userId && userId === post.author_id && (
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-1 text-[13px] text-text-muted/40 hover:text-red-500 press ml-auto transition-colors"
+                className="flex items-center gap-1 text-[13px] text-text-muted hover:text-red-500 press ml-auto"
               >
-                <Trash2 size={15} strokeWidth={1.5} />
+                <Trash2 size={14} strokeWidth={1.5} />
               </button>
             )}
           </div>
 
           {post.recent_comments?.length > 0 && (
-            <div className="mt-3 space-y-0.5">
+            <div className="mt-2.5 pl-1 border-l-2 border-border ml-1">
               {post.recent_comments.map((comment) => (
-                <div key={comment.id} className="flex gap-2 py-1">
+                <div key={comment.id} className="flex gap-2 py-1.5 pl-2.5">
+                  <Link
+                    href={`/user/${comment.author_id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="shrink-0 mt-0.5"
+                  >
+                    {comment.author.avatar_url ? (
+                      <div className="w-5 h-5 rounded-full overflow-hidden">
+                        <Image
+                          src={comment.author.avatar_url}
+                          alt={comment.author.full_name}
+                          width={20}
+                          height={20}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[8px] font-semibold text-text-muted">
+                        {comment.author.full_name?.[0] || "?"}
+                      </div>
+                    )}
+                  </Link>
                   <p className="text-[13px] leading-snug min-w-0">
                     <Link
                       href={`/user/${comment.author_id}`}
@@ -165,16 +183,16 @@ export function PostCard({
                     >
                       {comment.author.full_name}
                     </Link>{" "}
-                    <span className="text-text-muted/80">
-                      {comment.content.length > 80
-                        ? comment.content.slice(0, 80) + "..."
+                    <span className="text-text-muted">
+                      {comment.content.length > 100
+                        ? comment.content.slice(0, 100) + "..."
                         : comment.content}
                     </span>
                   </p>
                 </div>
               ))}
               {post.comment_count > 2 && (
-                <p className="text-[12px] text-text-muted/60 pt-0.5">
+                <p className="text-[12px] text-text-muted pl-2.5 pt-0.5">
                   View all {post.comment_count} comments
                 </p>
               )}

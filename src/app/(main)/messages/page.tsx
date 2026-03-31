@@ -10,6 +10,7 @@ export default async function MessagesPage() {
 
   if (!user) redirect("/login");
 
+  // Get all messages where the user is sender or receiver
   const { data: messages } = await supabase
     .from("messages")
     .select("*, sender:profiles!messages_sender_id_fkey(*), receiver:profiles!messages_receiver_id_fkey(*)")
@@ -48,7 +49,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="animate-slide-up">
-      <h1 className="text-[22px] font-bold tracking-tight mb-4">Messages</h1>
+      <h1 className="text-[22px] font-bold tracking-tight mb-6">Messages</h1>
       <ConversationList conversations={conversations} />
     </div>
   );

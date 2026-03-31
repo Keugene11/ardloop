@@ -27,7 +27,6 @@ export function ChatView({
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -68,62 +67,52 @@ export function ChatView({
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
 
-    const content = newMessage.trim();
-    setNewMessage("");
     setSending(true);
-
     const supabase = createClient();
+
     const { data } = await supabase
       .from("messages")
       .insert({
         sender_id: currentUserId,
         receiver_id: otherUserId,
-        content,
+        content: newMessage.trim(),
       })
       .select()
       .single();
 
     if (data) {
       setMessages((prev) => [...prev, data]);
+      setNewMessage("");
     }
     setSending(false);
   };
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 180px)" }}>
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto space-y-1 px-1 pb-4"
-      >
+    <div className="flex flex-col">
+      <div className="space-y-1.5 mb-4 max-h-[60vh] overflow-y-auto px-1">
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-text-muted/50 text-[14px]">
-              Start the conversation
-            </p>
-          </div>
+          <p className="text-center text-text-muted text-[14px] py-12">
+            Start the conversation
+          </p>
         )}
-        {messages.map((msg, i) => {
+        {messages.map((msg) => {
           const isMine = msg.sender_id === currentUserId;
-          const prevMsg = messages[i - 1];
-          const sameSender = prevMsg?.sender_id === msg.sender_id;
-          const showGap = !sameSender && i > 0;
-
           return (
             <div
               key={msg.id}
-              className={`flex ${isMine ? "justify-end" : "justify-start"} ${showGap ? "pt-2" : ""}`}
+              className={`flex ${isMine ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[75%] px-3.5 py-2 text-[14px] leading-snug ${
+                className={`max-w-[80%] px-3.5 py-2 text-[14px] leading-snug ${
                   isMine
-                    ? "bg-[#1a1a1a] text-white rounded-2xl rounded-br-md"
-                    : "bg-bg-input text-text rounded-2xl rounded-bl-md"
+                    ? "bg-[#1a1a1a] text-white rounded-2xl rounded-br-sm"
+                    : "bg-bg-input rounded-2xl rounded-bl-sm"
                 }`}
               >
-                <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                <p>{msg.content}</p>
                 <p
                   className={`text-[10px] mt-0.5 ${
-                    isMine ? "text-white/30" : "text-text-muted/50"
+                    isMine ? "text-white/40" : "text-text-muted/60"
                   }`}
                 >
                   {timeAgo(msg.created_at)}
@@ -135,21 +124,18 @@ export function ChatView({
         <div ref={bottomRef} />
       </div>
 
-      <form
-        onSubmit={handleSend}
-        className="flex gap-2 pt-3 border-t border-border/60"
-      >
+      <form onSubmit={handleSend} className="flex gap-2">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Message..."
-          className="flex-1 bg-bg-input/70 border border-transparent focus:border-border rounded-full pl-4 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/40 outline-none transition-all"
+          className="flex-1 bg-bg-input rounded-full pl-4 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:ring-1 focus:ring-text-muted/30 transition-all"
         />
         <button
           type="submit"
           disabled={!newMessage.trim() || sending}
-          className="bg-[#1a1a1a] text-white p-2.5 rounded-full press disabled:opacity-20 transition-opacity"
+          className="bg-[#1a1a1a] text-white p-2.5 rounded-full press disabled:opacity-30"
         >
           <Send size={16} strokeWidth={1.5} />
         </button>

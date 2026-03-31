@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut, Camera, Check, X, Pencil } from "lucide-react";
+import { LogOut, Camera, Check, X } from "lucide-react";
 
 export function ProfileActions({
   userId,
@@ -30,7 +30,6 @@ export function ProfileActions({
   const [savingBio, setSavingBio] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
-
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -80,7 +79,7 @@ export function ProfileActions({
       return;
     }
     if (file.size < 10 * 1024) {
-      alert("Image is too small. Minimum size is 10KB.");
+      alert("Image is too small. Minimum size is 10KB — use a higher quality photo.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -118,20 +117,8 @@ export function ProfileActions({
         className="hidden"
       />
 
-      {/* Header with sign out */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[22px] font-bold tracking-tight">Profile</h1>
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-1.5 text-[13px] text-text-muted/60 hover:text-red-500 press transition-colors"
-        >
-          <LogOut size={14} strokeWidth={1.5} />
-          Sign out
-        </button>
-      </div>
-
       {/* Avatar + Name + Email */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-5">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -139,17 +126,17 @@ export function ProfileActions({
           className="relative group press shrink-0"
         >
           {avatarPreview ? (
-            <div className="w-18 h-18 rounded-full overflow-hidden ring-2 ring-border">
+            <div className="w-16 h-16 rounded-full overflow-hidden">
               <Image
                 src={avatarPreview}
                 alt="Avatar"
-                width={72}
-                height={72}
+                width={64}
+                height={64}
                 className="w-full h-full object-cover"
               />
             </div>
           ) : (
-            <div className="w-18 h-18 rounded-full bg-bg-input flex items-center justify-center text-[24px] font-semibold text-text-muted ring-2 ring-border">
+            <div className="w-16 h-16 rounded-full bg-bg-input flex items-center justify-center text-[22px] font-semibold text-text-muted">
               {nameValue?.[0] || "?"}
             </div>
           )}
@@ -178,55 +165,54 @@ export function ProfileActions({
                     setNameValue(fullName);
                   }
                 }}
-                className="text-[18px] font-bold tracking-tight bg-transparent outline-none border-b-2 border-text w-full py-0.5"
+                className="text-[20px] font-bold tracking-tight bg-transparent outline-none border-b border-text w-full"
               />
               <button
                 onClick={handleSaveName}
                 disabled={savingName}
-                className="p-1.5 press text-text hover:bg-bg-input rounded-full transition-colors"
+                className="p-1 press text-text-muted"
               >
-                <Check size={16} strokeWidth={2} />
+                <Check size={18} strokeWidth={2} />
               </button>
               <button
                 onClick={() => {
                   setEditingName(false);
                   setNameValue(fullName);
                 }}
-                className="p-1.5 press text-text-muted hover:bg-bg-input rounded-full transition-colors"
+                className="p-1 press text-text-muted"
               >
-                <X size={16} strokeWidth={2} />
+                <X size={18} strokeWidth={2} />
               </button>
             </div>
           ) : (
             <button
               onClick={() => setEditingName(true)}
-              className="text-left press group flex items-center gap-1.5"
+              className="text-left press"
             >
-              <h2 className="text-[18px] font-bold tracking-tight">
+              <h1 className="text-[20px] font-bold tracking-tight">
                 {fullName}
-              </h2>
-              <Pencil size={13} strokeWidth={1.5} className="text-text-muted/0 group-hover:text-text-muted/60 transition-colors" />
+              </h1>
             </button>
           )}
-          <p className="text-[13px] text-text-muted/60 mt-0.5">{email}</p>
+          <p className="text-[13px] text-text-muted">{email}</p>
         </div>
       </div>
 
-      {/* Bio */}
+      {/* Bio — always visible, tap to edit */}
       {editingBio ? (
-        <div className="mb-6">
+        <div className="mb-5">
           <textarea
             value={bioValue}
             onChange={(e) => setBioValue(e.target.value)}
             placeholder={"Describe yourself to the Ardsley community.\n\nFor example:\n• Math & science tutor, grades 6-12\n• 3 years experience, $30/hr\n• Available weekends"}
             autoFocus
-            className="w-full bg-bg-input/70 border border-border focus:border-text-muted/40 rounded-xl p-3.5 text-[14px] leading-relaxed placeholder:text-text-muted/30 outline-none resize-none min-h-[130px] transition-colors"
+            className="w-full bg-bg-input rounded-xl p-3.5 text-[14px] leading-relaxed placeholder:text-text-muted/40 outline-none resize-none min-h-[130px] focus:ring-1 focus:ring-text-muted/30 transition-all"
           />
-          <div className="flex gap-2 mt-2.5">
+          <div className="flex gap-2 mt-2">
             <button
               onClick={handleSaveBio}
               disabled={savingBio}
-              className="bg-[#1a1a1a] text-white px-4 py-2 rounded-full font-semibold text-[13px] press disabled:opacity-30 transition-opacity"
+              className="bg-[#1a1a1a] text-white px-4 py-2 rounded-full font-semibold text-[13px] press disabled:opacity-30"
             >
               {savingBio ? "Saving..." : "Save"}
             </button>
@@ -235,7 +221,7 @@ export function ProfileActions({
                 setEditingBio(false);
                 setBioValue(bio);
               }}
-              className="text-[13px] text-text-muted px-3 py-2 press hover:bg-bg-input rounded-full transition-colors"
+              className="text-[13px] text-text-muted px-3 py-2 press"
             >
               Cancel
             </button>
@@ -244,27 +230,35 @@ export function ProfileActions({
       ) : (
         <button
           onClick={() => setEditingBio(true)}
-          className="w-full text-left mb-6 press rounded-xl transition-colors group"
+          className="w-full text-left mb-5 press rounded-xl transition-colors"
         >
           {bio ? (
-            <div className="flex items-start gap-2">
-              <p className="text-[14px] leading-relaxed whitespace-pre-wrap flex-1">
-                {bio}
-              </p>
-              <Pencil size={13} strokeWidth={1.5} className="text-text-muted/0 group-hover:text-text-muted/60 transition-colors mt-1 shrink-0" />
-            </div>
+            <p className="text-[14px] leading-relaxed whitespace-pre-wrap">
+              {bio}
+            </p>
           ) : (
-            <div className="bg-bg-input/50 border border-dashed border-border rounded-xl px-4 py-4 hover:bg-bg-input/80 transition-colors">
+            <div className="bg-bg-input/50 border border-dashed border-border rounded-xl px-4 py-4">
               <p className="text-[14px] text-text-muted/60 font-medium">
-                Add a bio
+                Tap to add a bio
               </p>
               <p className="text-[12px] text-text-muted/40 mt-0.5">
-                Tell people what you offer, your experience, rates, etc.
+                Tell people what services you offer, your experience, rates, etc.
               </p>
             </div>
           )}
         </button>
       )}
+
+      {/* Sign out */}
+      <div className="flex items-center">
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-1.5 text-[13px] text-red-400 press ml-auto"
+        >
+          <LogOut size={14} strokeWidth={1.5} />
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }

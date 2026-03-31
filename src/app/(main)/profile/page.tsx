@@ -14,25 +14,32 @@ export default async function ProfilePage() {
 
   if (!user) redirect("/login");
 
-  // Parallelize queries
-  const [profileResult, postsResult] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase
-      .from("posts")
-      .select(`*, like_count:likes(count), comment_count:comments(count)`)
-      .eq("author_id", user.id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-  const profile = profileResult.data;
-  const formattedPosts = (postsResult.data || []).map((post) => ({
+  const { data: posts } = await supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      like_count:likes(count),
+      comment_count:comments(count)
+    `
+    )
+    .eq("author_id", user.id)
+    .order("created_at", { ascending: false });
+
+  const formattedPosts = (posts || []).map((post) => ({
     ...post,
     like_count: post.like_count?.[0]?.count || 0,
     comment_count: post.comment_count?.[0]?.count || 0,
   }));
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-slide-up">
       <ProfileActions
         userId={user.id}
         fullName={profile?.full_name || ""}
@@ -41,26 +48,21 @@ export default async function ProfilePage() {
         bio={profile?.bio || ""}
       />
 
-      <div className="mt-6 border-t border-border/60 pt-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[13px] font-semibold uppercase tracking-wider text-text-muted/60">
-            Your Posts
-          </h3>
-          <span className="text-[12px] text-text-muted/40">{formattedPosts.length}</span>
-        </div>
-        <div className="space-y-2.5">
+      <div className="mt-8">
+        <h3 className="text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-3">
+          Posts
+        </h3>
+        <div className="space-y-3">
           {formattedPosts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-[14px] text-text-muted/50">
-                Nothing yet.
-              </p>
-            </div>
+            <p className="text-[14px] text-text-muted text-center py-10">
+              Nothing yet.
+            </p>
           ) : (
             formattedPosts.map((post) => (
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
-                className="block bg-bg-card border border-border/60 rounded-2xl px-4 py-3.5 press hover:bg-bg-card-hover transition-colors"
+                className="block bg-bg-card border border-border rounded-2xl px-4 py-3.5 press hover:bg-bg-card-hover transition-colors"
               >
                 <p className="text-[14px] leading-relaxed line-clamp-3 whitespace-pre-wrap">
                   {post.content}
@@ -73,19 +75,18 @@ export default async function ProfilePage() {
                 )}
 
                 {post.image_url && (
-                  <div className="mt-2.5 rounded-xl overflow-hidden border border-border/30">
+                  <div className="mt-2.5 rounded-xl overflow-hidden">
                     <Image
                       src={post.image_url}
                       alt="Post image"
                       width={400}
                       height={200}
                       className="w-full h-32 object-cover"
-                      sizes="(max-width: 448px) 100vw, 400px"
                     />
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 mt-2.5 text-text-muted/60">
+                <div className="flex items-center gap-4 mt-2.5 text-text-muted">
                   <span className="text-[12px]">
                     {timeAgo(post.created_at)}
                   </span>

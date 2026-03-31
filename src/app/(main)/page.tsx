@@ -7,52 +7,34 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Parallelize independent queries
-  const [postsResult, userCountResult, userProfileResult] = await Promise.all([
-    supabase
-      .from("posts")
-      .select(
-        `
-        *,
-        author:profiles(*),
-        like_count:likes(count),
-        comment_count:comments(count)
+  const { data: posts } = await supabase
+    .from("posts")
+    .select(
       `
-      )
-      .order("created_at", { ascending: false })
-      .limit(50),
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    user
-      ? supabase
-          .from("profiles")
-          .select("avatar_url, full_name")
-          .eq("id", user.id)
-          .single()
-      : Promise.resolve({ data: null }),
-  ]);
+      *,
+      author:profiles(*),
+      like_count:likes(count),
+      comment_count:comments(count)
+    `
+    )
+    .order("created_at", { ascending: false })
+    .limit(50);
 
-  const posts = postsResult.data;
-  const userCount = userCountResult.count;
-  const userProfile = userProfileResult.data;
   const postIds = (posts || []).map((p) => p.id);
 
-  // Parallelize comments + likes fetch
-  const [commentsResult, likesResult] = await Promise.all([
-    postIds.length
-      ? supabase
-          .from("comments")
-          .select("*, author:profiles(*)")
-          .in("post_id", postIds)
-          .order("created_at", { ascending: false })
-          .limit(200)
-      : Promise.resolve({ data: [] }),
-    user
-      ? supabase.from("likes").select("post_id").eq("user_id", user.id)
-      : Promise.resolve({ data: [] }),
-  ]);
+  // Fetch recent comments for all posts in one query
+  const { data: recentComments } = postIds.length
+    ? await supabase
+        .from("comments")
+        .select("*, author:profiles(*)")
+        .in("post_id", postIds)
+        .order("created_at", { ascending: false })
+        .limit(200)
+    : { data: [] };
 
-  const commentsByPost = new Map<string, typeof commentsResult.data>();
-  (commentsResult.data || []).forEach((c) => {
+  // Group comments by post_id, keep latest 2 per post
+  const commentsByPost = new Map<string, typeof recentComments>();
+  (recentComments || []).forEach((c) => {
     const existing = commentsByPost.get(c.post_id) || [];
     if (existing.length < 2) {
       existing.push(c);
@@ -60,9 +42,14 @@ export default async function HomePage() {
     }
   });
 
-  const likedPostIds = new Set(
-    (likesResult.data || []).map((l) => l.post_id)
-  );
+  let likedPostIds: Set<string> = new Set();
+  if (user) {
+    const { data: likes } = await supabase
+      .from("likes")
+      .select("post_id")
+      .eq("user_id", user.id);
+    likedPostIds = new Set(likes?.map((l) => l.post_id) || []);
+  }
 
   const formattedPosts = (posts || []).map((post) => ({
     ...post,
@@ -72,17 +59,34 @@ export default async function HomePage() {
     recent_comments: (commentsByPost.get(post.id) || []).reverse(),
   }));
 
+  const { count: userCount } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true });
+
+  let userProfile: { avatar_url: string | null; full_name: string } | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("avatar_url, full_name")
+      .eq("id", user.id)
+      .single();
+    userProfile = profile;
+  }
+
   return (
     <>
-      <header className="mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[28px] font-extrabold tracking-tight">Ardsleypost</h1>
+      <header className="mb-5">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-[26px] font-extrabold tracking-tight">Ardsleypost</h1>
           {userCount !== null && userCount > 0 && (
-            <span className="text-[11px] text-text-muted bg-bg-input px-2.5 py-1 rounded-full font-medium">
+            <span className="text-[12px] text-text-muted font-medium">
               {userCount} {userCount === 1 ? "member" : "members"}
             </span>
           )}
         </div>
+        <p className="text-[13px] text-text-muted mt-1 leading-snug">
+          The social network built for Ardsley students, parents, and alumni.
+        </p>
       </header>
       <Feed
         initialPosts={formattedPosts}
