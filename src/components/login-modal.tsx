@@ -145,41 +145,40 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <div
-        className="absolute inset-0 bg-black/40 animate-fade-in"
+        className="absolute inset-0 bg-black/50 animate-fade-in"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-sm bg-bg rounded-2xl px-6 pt-5 pb-6 animate-fade-in z-10 max-h-[85dvh] overflow-y-auto shadow-xl border border-border">
-
+      <div className="relative w-full max-w-[400px] bg-bg-card rounded-3xl px-8 pt-8 pb-8 animate-fade-in z-10 max-h-[85dvh] overflow-y-auto shadow-2xl border border-border">
         <button
           onClick={step === "email" ? () => { setStep("main"); setEmailError(""); setEmailSuccess(""); } : onClose}
-          className="absolute right-5 top-5 p-1 press text-text-muted"
+          className="absolute right-6 top-6 p-1 press text-text-muted hover:text-text transition-colors"
         >
-          <X size={20} strokeWidth={1.5} />
+          <X size={18} strokeWidth={2} />
         </button>
 
         {step === "main" ? (
           <>
-            <div className="text-center mb-7 mt-2">
+            <div className="text-center mb-8">
               <h2
-                className="text-[24px] font-bold tracking-tight text-text"
+                className="text-[28px] font-bold tracking-tight text-text"
                 onClick={() => setTapCount((c) => c + 1)}
               >
                 Log in or sign up
               </h2>
-              <p className="text-[14px] text-text-muted mt-1.5 max-w-[260px] mx-auto leading-snug">
+              <p className="text-[14px] text-text-muted mt-2 leading-snug">
                 Post, message, and connect with the Ardsley community.
               </p>
             </div>
 
-            <div className="space-y-3 mb-5">
+            <div className="space-y-2.5 mb-6">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center gap-3 bg-bg-card border border-border py-3.5 px-4 rounded-2xl font-semibold press text-[15px] hover:bg-bg-card-hover transition-colors"
+                className="w-full flex items-center justify-center gap-3 border border-border py-3.5 rounded-full font-semibold press text-[14px] hover:bg-bg-card-hover transition-colors"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -191,9 +190,9 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
               {showApple && (
                 <button
                   onClick={handleAppleLogin}
-                  className="w-full flex items-center gap-3 bg-bg-card border border-border py-3.5 px-4 rounded-2xl font-semibold press text-[15px] hover:bg-bg-card-hover transition-colors"
+                  className="w-full flex items-center justify-center gap-3 border border-border py-3.5 rounded-full font-semibold press text-[14px] hover:bg-bg-card-hover transition-colors"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </svg>
                   Continue with Apple
@@ -201,9 +200,9 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-6">
               <div className="flex-1 h-px bg-border" />
-              <span className="text-[12px] text-text-muted uppercase tracking-wide font-medium">or</span>
+              <span className="text-[12px] text-text-muted uppercase tracking-wider font-medium">or</span>
               <div className="flex-1 h-px bg-border" />
             </div>
 
@@ -214,17 +213,17 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-[15px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+                className="w-full border border-border rounded-xl px-4 py-3.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors bg-transparent"
               />
               <button
                 type="submit"
-                className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold press text-[15px] mt-3"
+                className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-full font-semibold press text-[14px] mt-3"
               >
                 Continue
               </button>
             </form>
 
-            <div className="flex items-center justify-center gap-3 mt-6 mb-2 text-[12px] text-text-muted">
+            <div className="flex items-center justify-center gap-3 mt-6 text-[12px] text-text-muted">
               <a href="/terms" className="underline underline-offset-2">Terms</a>
               <span>·</span>
               <a href="/privacy" className="underline underline-offset-2">Privacy</a>
@@ -235,23 +234,23 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
                 <button
                   onClick={() => handleDemoLogin("/api/demo-login", setDemoLoading)}
                   disabled={demoLoading || demo2Loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-bg-input text-text py-3.5 rounded-2xl font-semibold press text-[14px]"
+                  className="flex-1 flex items-center justify-center gap-2 bg-bg-input text-text py-3 rounded-full font-semibold press text-[13px]"
                 >
-                  {demoLoading ? "Signing in..." : "Demo User 1"}
+                  {demoLoading ? "..." : "Demo 1"}
                 </button>
                 <button
                   onClick={() => handleDemoLogin("/api/demo-login2", setDemo2Loading)}
                   disabled={demoLoading || demo2Loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-bg-input text-text py-3.5 rounded-2xl font-semibold press text-[14px]"
+                  className="flex-1 flex items-center justify-center gap-2 bg-bg-input text-text py-3 rounded-full font-semibold press text-[13px]"
                 >
-                  {demo2Loading ? "Signing in..." : "Demo User 2"}
+                  {demo2Loading ? "..." : "Demo 2"}
                 </button>
               </div>
             )}
           </>
         ) : (
           <>
-            <div className="text-center mb-6 mt-2">
+            <div className="text-center mb-6">
               <h2 className="text-[24px] font-bold tracking-tight text-text">
                 {isSignUp ? "Create your account" : "Enter your password"}
               </h2>
@@ -267,7 +266,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   autoFocus
-                  className="w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-[15px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+                  className="w-full border border-border rounded-xl px-4 py-3.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors bg-transparent"
                 />
               )}
               <input
@@ -278,7 +277,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
                 required
                 autoFocus={!isSignUp}
                 minLength={6}
-                className="w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-[15px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+                className="w-full border border-border rounded-xl px-4 py-3.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors bg-transparent"
               />
               {emailError && (
                 <p className="text-[13px] text-red-500">{emailError}</p>
@@ -289,7 +288,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
               <button
                 type="submit"
                 disabled={emailLoading}
-                className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold press text-[15px]"
+                className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-full font-semibold press text-[14px]"
               >
                 {emailLoading
                   ? "Loading..."
