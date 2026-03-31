@@ -1,5 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#1a1a1a",
+};
 
 export const metadata: Metadata = {
   title: "Ardsleypost — Ardsley Community",
@@ -9,6 +17,16 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Ardsleypost",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -22,10 +40,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <meta name="theme-color" content="#1a1a1a" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-      </head>
       <body>{children}</body>
     </html>
   );
