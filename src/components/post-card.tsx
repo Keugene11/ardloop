@@ -28,10 +28,7 @@ export function PostCard({
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const handleDelete = async () => {
     if (!confirmingDelete) {
       setConfirmingDelete(true);
       return;
@@ -45,9 +42,7 @@ export function PostCard({
     router.refresh();
   };
 
-  const cancelDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const cancelDelete = () => {
     setConfirmingDelete(false);
   };
 
@@ -75,16 +70,12 @@ export function PostCard({
     }
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleEdit = () => {
     setEditContent(displayContent);
     setEditing(true);
   };
 
-  const handleSaveEdit = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSaveEdit = async () => {
     if (!editContent.trim() || editContent.length > 5000 || saving) return;
     setSaving(true);
     const supabase = createClient();
@@ -100,19 +91,25 @@ export function PostCard({
     setSaving(false);
   };
 
-  const handleCancelEdit = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleCancelEdit = () => {
     setEditing(false);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if user is selecting text
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+    // Don't navigate if clicking on interactive elements or text content
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button, textarea, input, [data-no-navigate]")) return;
+    router.push(`/post/${post.id}`);
   };
 
   return (
     <>
-    <Link href={`/post/${post.id}`}>
-      <article className="flex gap-3 py-3.5">
+      <article className="flex gap-3 py-3.5 cursor-pointer" onClick={handleCardClick}>
         <Link
           href={`/user/${post.author_id}`}
-          onClick={(e) => e.stopPropagation()}
           className="shrink-0 mt-0.5"
         >
           {post.author.avatar_url ? (
@@ -136,7 +133,6 @@ export function PostCard({
           <div className="flex items-baseline gap-2">
             <Link
               href={`/user/${post.author_id}`}
-              onClick={(e) => e.stopPropagation()}
               className="text-[14px] font-semibold truncate hover:underline"
             >
               {post.author.full_name}
@@ -147,7 +143,7 @@ export function PostCard({
           </div>
 
           {editing ? (
-            <div className="mt-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+            <div className="mt-1" data-no-navigate>
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
@@ -179,7 +175,7 @@ export function PostCard({
               </div>
             </div>
           ) : (
-            <p className="text-[14px] leading-relaxed mt-0.5 whitespace-pre-wrap">
+            <p className="text-[14px] leading-relaxed mt-0.5 whitespace-pre-wrap select-text" data-no-navigate>
               {displayContent}
             </p>
           )}
@@ -217,18 +213,13 @@ export function PostCard({
             {userId && userId !== post.author_id && (
               <span className="flex items-center gap-3 ml-auto">
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowReport(true);
-                  }}
+                  onClick={() => setShowReport(true)}
                   className="flex items-center gap-1 text-[13px] text-text-muted hover:text-orange-500 press"
                 >
                   <Flag size={14} strokeWidth={1.5} />
                 </button>
                 <Link
                   href={`/messages/${post.author_id}`}
-                  onClick={(e) => e.stopPropagation()}
                   className="flex items-center gap-1 text-[13px] text-text-muted press"
                 >
                   <Send size={14} strokeWidth={1.5} />
@@ -276,7 +267,6 @@ export function PostCard({
                 <div key={comment.id} className="flex gap-2 py-1.5 pl-2.5">
                   <Link
                     href={`/user/${comment.author_id}`}
-                    onClick={(e) => e.stopPropagation()}
                     className="shrink-0 mt-0.5"
                   >
                     {comment.author.avatar_url ? (
@@ -298,7 +288,6 @@ export function PostCard({
                   <p className="text-[13px] leading-snug min-w-0">
                     <Link
                       href={`/user/${comment.author_id}`}
-                      onClick={(e) => e.stopPropagation()}
                       className="font-semibold hover:underline"
                     >
                       {comment.author.full_name}
@@ -320,7 +309,6 @@ export function PostCard({
           )}
         </div>
       </article>
-    </Link>
     {showReport && (
       <ReportModal
         type="post"
