@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { Camera, Check, X, Pencil, ChevronDown } from "lucide-react";
+import { Camera, Check, X, Pencil } from "lucide-react";
 import { ROLE_OPTIONS, ROLE_LABELS } from "@/types";
 import type { UserRole } from "@/types";
 
@@ -37,7 +37,7 @@ export function ProfileActions({
   const [toast, setToast] = useState<string | null>(null);
   const [roleValue, setRoleValue] = useState<UserRole | null>(role);
   const [savingRole, setSavingRole] = useState(false);
-  const [roleOpen, setRoleOpen] = useState(false);
+
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -222,46 +222,22 @@ export function ProfileActions({
       </div>
 
       {/* Role selector */}
-      <div className="mb-5 relative">
-        <button
-          type="button"
-          onClick={() => setRoleOpen(!roleOpen)}
-          disabled={savingRole}
-          className="flex items-center gap-2 bg-bg-input border border-border rounded-full px-4 py-2.5 press cursor-pointer"
-        >
-          <span className="text-[13px] font-semibold text-text">
-            {roleValue ? ROLE_LABELS[roleValue] : "I am a..."}
-          </span>
-          <ChevronDown
-            size={14}
-            strokeWidth={2}
-            className={`text-text-muted transition-transform duration-200 ${roleOpen ? "rotate-180" : ""}`}
-          />
-        </button>
-        {roleOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setRoleOpen(false)} />
-            <div className="absolute top-full left-0 mt-2 bg-bg-card border border-border rounded-2xl shadow-lg z-50 overflow-hidden animate-fade-in min-w-[160px]">
-              {ROLE_OPTIONS.map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => {
-                    handleRoleChange(r);
-                    setRoleOpen(false);
-                  }}
-                  className={`w-full text-left px-4 py-3 text-[14px] font-medium press transition-colors ${
-                    roleValue === r
-                      ? "bg-[#1a1a1a] text-white"
-                      : "text-text hover:bg-bg-input"
-                  }`}
-                >
-                  {ROLE_LABELS[r]}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+      <div className="mb-5 flex flex-wrap gap-2">
+        {ROLE_OPTIONS.map((r) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => handleRoleChange(r)}
+            disabled={savingRole}
+            className={`px-4 py-2 rounded-full text-[13px] font-semibold press transition-colors ${
+              roleValue === r
+                ? "bg-[#1a1a1a] text-white"
+                : "bg-bg-input border border-border text-text hover:bg-bg-card-hover"
+            }`}
+          >
+            {ROLE_LABELS[r]}
+          </button>
+        ))}
       </div>
 
       {/* Bio — always visible, tap to edit */}
