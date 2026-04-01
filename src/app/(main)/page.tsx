@@ -18,8 +18,7 @@ export default async function HomePage() {
         *,
         author:profiles(*),
         like_count:likes(count),
-        comment_count:comments(count),
-        impression_count:post_impressions(count)
+        comment_count:comments(count)
 `
       )
       .order("created_at", { ascending: false })
@@ -75,7 +74,7 @@ export default async function HomePage() {
       ...post,
       like_count: post.like_count?.[0]?.count || 0,
       comment_count: post.comment_count?.[0]?.count || 0,
-      impression_count: post.impression_count?.[0]?.count || 0,
+      impression_count: 0,
       user_has_liked: likedPostIds.has(post.id),
       recent_comments: (commentsByPost.get(post.id) || []).reverse(),
     }));

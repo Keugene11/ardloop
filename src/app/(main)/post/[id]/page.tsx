@@ -34,16 +34,11 @@ export default async function PostPage({
     .eq("post_id", id)
     .order("created_at", { ascending: true });
 
-  const [{ count: likeCount }, { count: impressionCount }] = await Promise.all([
-    supabase
-      .from("likes")
-      .select("*", { count: "exact", head: true })
-      .eq("post_id", id),
-    supabase
-      .from("post_impressions")
-      .select("*", { count: "exact", head: true })
-      .eq("post_id", id),
-  ]);
+  const { count: likeCount } = await supabase
+    .from("likes")
+    .select("*", { count: "exact", head: true })
+    .eq("post_id", id);
+  const impressionCount = 0;
 
   let userHasLiked = false;
   if (user) {
