@@ -44,8 +44,8 @@ export default async function ChatPage({
     .eq("read", false);
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg flex flex-col animate-slide-up">
-      <div className="flex items-center gap-3 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3 border-b border-border">
+    <div className="animate-slide-up">
+      <div className="flex items-center gap-3 mb-4">
         <Link href="/messages" className="press">
           <ArrowLeft size={20} strokeWidth={1.5} className="text-text-muted" />
         </Link>
