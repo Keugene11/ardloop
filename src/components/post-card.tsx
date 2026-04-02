@@ -212,8 +212,8 @@ export function PostCard({
             </div>
           )}
 
-          <div className="flex items-center gap-5 mt-2.5">
-            <span className={`flex items-center gap-1 text-[13px] ${
+          <div className="flex items-center gap-6 mt-3">
+            <span className={`flex items-center gap-1.5 text-[15px] ${
                 liked ? "text-red-500" : "text-text-muted"
               }`}>
               <button
@@ -221,7 +221,7 @@ export function PostCard({
                 className="press"
               >
                 <Heart
-                  size={15}
+                  size={20}
                   fill={liked ? "currentColor" : "none"}
                   strokeWidth={1.5}
                 />
@@ -232,21 +232,21 @@ export function PostCard({
                 </button>
               )}
             </span>
-            <span className="flex items-center gap-1 text-[13px] text-text-muted">
-              <MessageCircle size={15} strokeWidth={1.5} />
+            <span className="flex items-center gap-1.5 text-[15px] text-text-muted">
+              <MessageCircle size={20} strokeWidth={1.5} />
               {post.comment_count > 0 && post.comment_count}
             </span>
-            <span className="flex items-center gap-1 text-[13px] text-text-muted">
-              <Eye size={15} strokeWidth={1.5} />
+            <span className="flex items-center gap-1.5 text-[15px] text-text-muted">
+              <Eye size={20} strokeWidth={1.5} />
               {post.impression_count > 0 && post.impression_count}
             </span>
             {userId && userId !== post.author_id && (
               <span className="flex items-center gap-3 ml-auto">
                 <button
                   onClick={() => setShowReport(true)}
-                  className="flex items-center gap-1 text-[13px] text-text-muted hover:text-orange-500 press"
+                  className="flex items-center gap-1 text-[15px] text-text-muted hover:text-orange-500 press"
                 >
-                  <Flag size={14} strokeWidth={1.5} />
+                  <Flag size={18} strokeWidth={1.5} />
                 </button>
               </span>
             )}
