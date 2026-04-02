@@ -15,10 +15,12 @@ export function PostCard({
   post,
   userId,
   onVisible,
+  isAdmin,
 }: {
   post: Post;
   userId: string | null;
   onVisible?: (postId: string) => void;
+  isAdmin?: boolean;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -54,10 +56,18 @@ export function PostCard({
       return;
     }
 
-    const supabase = createClient();
-    await supabase.from("comments").delete().eq("post_id", post.id);
-    await supabase.from("likes").delete().eq("post_id", post.id);
-    await supabase.from("posts").delete().eq("id", post.id).eq("author_id", userId);
+    if (isAdmin && userId !== post.author_id) {
+      await fetch("/api/admin/delete-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: post.id }),
+      });
+    } else {
+      const supabase = createClient();
+      await supabase.from("comments").delete().eq("post_id", post.id);
+      await supabase.from("likes").delete().eq("post_id", post.id);
+      await supabase.from("posts").delete().eq("id", post.id).eq("author_id", userId);
+    }
     setDeleted(true);
     router.refresh();
   };
@@ -250,7 +260,7 @@ export function PostCard({
                 </button>
               </span>
             )}
-            {userId && userId === post.author_id && !editing && (
+            {userId && (userId === post.author_id || isAdmin) && !editing && (
               confirmingDelete ? (
                 <span className="flex items-center gap-2 ml-auto">
                   <button
@@ -268,12 +278,14 @@ export function PostCard({
                 </span>
               ) : (
                 <span className="flex items-center gap-2 ml-auto">
-                  <button
-                    onClick={handleEdit}
-                    className="flex items-center gap-1 text-[13px] text-text-muted hover:text-text press"
-                  >
-                    <Pencil size={14} strokeWidth={1.5} />
-                  </button>
+                  {userId === post.author_id && (
+                    <button
+                      onClick={handleEdit}
+                      className="flex items-center gap-1 text-[13px] text-text-muted hover:text-text press"
+                    >
+                      <Pencil size={14} strokeWidth={1.5} />
+                    </button>
+                  )}
                   <button
                     onClick={handleDelete}
                     className="flex items-center gap-1 text-[13px] text-text-muted hover:text-red-500 press"

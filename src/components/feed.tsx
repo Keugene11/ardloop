@@ -15,11 +15,13 @@ export function Feed({
   userId,
   userAvatarUrl,
   userFullName,
+  isAdmin,
 }: {
   initialPosts: Post[];
   userId: string | null;
   userAvatarUrl: string | null;
   userFullName: string | null;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -364,7 +366,7 @@ export function Feed({
           </div>
         ) : (
           filtered.map((post) => (
-            <PostCard key={post.id} post={post} userId={userId} onVisible={trackImpression} />
+            <PostCard key={post.id} post={post} userId={userId} onVisible={trackImpression} isAdmin={isAdmin} />
           ))
         )}
       </div>

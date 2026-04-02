@@ -31,9 +31,11 @@ export default async function HomePage() {
   const posts = postsResult.data;
   const userCount = userCountResult.count;
 
+  const ADMIN_EMAILS = ["keugenelee11@gmail.com"];
   let likedPostIds = new Set<string>();
   let blockedUserIds = new Set<string>();
   let userProfile: { avatar_url: string | null; full_name: string } | null = null;
+  const isAdmin = ADMIN_EMAILS.includes(user?.email || "");
 
   if (user) {
     const [likesResult, blocksResult, profileResult] = await Promise.all([
@@ -129,6 +131,7 @@ export default async function HomePage() {
         userId={user?.id || null}
         userAvatarUrl={userProfile?.avatar_url || null}
         userFullName={userProfile?.full_name || null}
+        isAdmin={isAdmin}
       />
     </>
   );
