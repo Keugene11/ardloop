@@ -193,7 +193,7 @@ export function PostCard({
               </div>
             </div>
           ) : (
-            <p className="text-[14px] leading-relaxed mt-0.5 whitespace-pre-wrap select-text" data-no-navigate>
+            <p className="text-[14px] leading-relaxed mt-0.5 whitespace-pre-wrap select-text">
               {displayContent}
             </p>
           )}
