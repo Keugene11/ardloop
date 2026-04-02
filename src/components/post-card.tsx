@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, Send, Trash2, Flag, Pencil, Check, X, Eye } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Flag, Pencil, Check, X, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post } from "@/types";
 import { timeAgo } from "@/lib/utils";
@@ -248,12 +248,6 @@ export function PostCard({
                 >
                   <Flag size={14} strokeWidth={1.5} />
                 </button>
-                <Link
-                  href={`/messages/${post.author_id}`}
-                  className="flex items-center gap-1 text-[13px] text-text-muted press"
-                >
-                  <Send size={14} strokeWidth={1.5} />
-                </Link>
               </span>
             )}
             {userId && userId === post.author_id && !editing && (
