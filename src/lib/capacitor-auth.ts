@@ -11,8 +11,8 @@ export function isNativePlatform(): boolean {
 }
 
 /**
- * Perform OAuth sign-in using SFSafariViewController (iOS) or Chrome Custom Tabs (Android)
- * instead of redirecting to the system browser.
+ * Perform OAuth sign-in using ASWebAuthenticationSession (iOS) or Chrome Custom Tabs (Android).
+ * ASWebAuthenticationSession shares cookies with Safari so users see their existing Google accounts.
  */
 export async function nativeOAuthSignIn(provider: "google" | "apple") {
   const supabase = createClient();
@@ -32,7 +32,32 @@ export async function nativeOAuthSignIn(provider: "google" | "apple") {
     return;
   }
 
-  // Open in SFSafariViewController / Chrome Custom Tabs (stays in-app)
+  // Try ASWebAuthenticationSession (shares Safari cookies — shows Google account picker)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const WebAuth = (window as any).Capacitor?.Plugins?.WebAuth;
+  if (WebAuth) {
+    try {
+      const result = await WebAuth.start({
+        url: data.url,
+        callbackScheme: "com.ardsleypost.app",
+      });
+      if (result?.url) {
+        // Extract code from callback URL and exchange for session
+        const callbackUrl = new URL(result.url);
+        const code = callbackUrl.searchParams.get("code");
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+          window.location.href = "/";
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("WebAuth failed:", err);
+    }
+    return;
+  }
+
+  // Fallback: Browser plugin (Android or if WebAuth unavailable)
   const { Browser } = await import("@capacitor/browser");
   await Browser.open({
     url: data.url,
