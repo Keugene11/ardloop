@@ -49,6 +49,10 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Ardsleypost needs access to your camera to take photos for posts and your profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ardsleypost needs access to your photo library to select images for posts and your profile picture.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
