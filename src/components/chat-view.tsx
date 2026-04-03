@@ -18,10 +18,14 @@ export function ChatView({
   messages: initialMessages,
   currentUserId,
   otherUserId,
+  currentUserName,
+  otherUserName,
 }: {
   messages: ChatMessage[];
   currentUserId: string;
   otherUserId: string;
+  currentUserName: string;
+  otherUserName: string;
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [newMessage, setNewMessage] = useState("");
@@ -88,6 +92,16 @@ export function ChatView({
     if (data) {
       setMessages((prev) => [...prev, data]);
       setNewMessage("");
+      // Notify admin of new DM (fire and forget)
+      fetch("/api/notify/new-dm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender_name: currentUserName,
+          receiver_name: otherUserName,
+          content: data.content,
+        }),
+      }).catch(() => {});
     }
     setSending(false);
   };

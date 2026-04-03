@@ -75,6 +75,8 @@ export default async function ChatPage({
         messages={messages || []}
         currentUserId={user.id}
         otherUserId={otherUserId}
+        currentUserName={user.user_metadata?.full_name || user.email || "Someone"}
+        otherUserName={otherUser.full_name || "Someone"}
       />
     </div>
   );
