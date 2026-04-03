@@ -1,8 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Resend } from "resend";
+import { sendAdminEmail } from "@/lib/email";
 import { NextRequest, NextResponse } from "next/server";
-
-const ADMIN_EMAIL = "keugenelee11@gmail.com";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -29,24 +27,18 @@ export async function POST(req: NextRequest) {
   const preview = content?.slice(0, 200) || "(no content)";
 
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: "Ardsleypost <notifications@ardsleypost.com>",
-      to: ADMIN_EMAIL,
-      subject: `New post from ${authorName}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px;">
-          <h2 style="margin: 0 0 8px;">New post pending approval</h2>
-          <p style="margin: 0 0 4px;"><strong>${authorName}</strong> just posted:</p>
-          <blockquote style="margin: 12px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; border-left: 3px solid #333;">
-            ${preview}
-          </blockquote>
-          <a href="https://ardsleypost.com" style="display: inline-block; margin-top: 12px; padding: 8px 20px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 20px; font-size: 14px;">
-            Review posts
-          </a>
-        </div>
-      `,
-    });
+    await sendAdminEmail(`New post from ${authorName}`, `
+      <div style="font-family: sans-serif; max-width: 480px;">
+        <h2 style="margin: 0 0 8px;">New post pending approval</h2>
+        <p style="margin: 0 0 4px;"><strong>${authorName}</strong> just posted:</p>
+        <blockquote style="margin: 12px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; border-left: 3px solid #333;">
+          ${preview}
+        </blockquote>
+        <a href="https://ardsleypost.com" style="display: inline-block; margin-top: 12px; padding: 8px 20px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 20px; font-size: 14px;">
+          Review posts
+        </a>
+      </div>
+    `);
   } catch {
     // Don't fail the request if email fails
   }
