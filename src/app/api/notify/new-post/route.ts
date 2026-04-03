@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { sendAdminEmail } from "@/lib/email";
 import { NextRequest, NextResponse } from "next/server";
 
+const BASE_URL = "https://ardsleypost.com";
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const {
@@ -25,6 +27,9 @@ export async function POST(req: NextRequest) {
 
   const authorName = profile?.full_name || "Someone";
   const preview = content?.slice(0, 200) || "(no content)";
+  const secret = process.env.ADMIN_ACTION_SECRET;
+  const approveUrl = `${BASE_URL}/api/admin/email-action?secret=${secret}&action=approve&type=post&id=${post_id}`;
+  const rejectUrl = `${BASE_URL}/api/admin/email-action?secret=${secret}&action=reject&type=post&id=${post_id}`;
 
   try {
     await sendAdminEmail(`New post from ${authorName}`, `
@@ -34,9 +39,15 @@ export async function POST(req: NextRequest) {
         <blockquote style="margin: 12px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; border-left: 3px solid #333;">
           ${preview}
         </blockquote>
-        <a href="https://ardsleypost.com" style="display: inline-block; margin-top: 12px; padding: 8px 20px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 20px; font-size: 14px;">
-          Review posts
-        </a>
+        <div style="margin-top: 16px;">
+          <a href="${approveUrl}" style="display: inline-block; padding: 10px 24px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 20px; font-size: 14px; font-weight: 600;">
+            Approve
+          </a>
+          &nbsp;&nbsp;
+          <a href="${rejectUrl}" style="display: inline-block; padding: 10px 24px; background: #fff; color: #dc2626; text-decoration: none; border-radius: 20px; font-size: 14px; font-weight: 600; border: 2px solid #dc2626;">
+            Reject
+          </a>
+        </div>
       </div>
     `);
   } catch {

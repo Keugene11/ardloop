@@ -97,6 +97,7 @@ export function ChatView({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          message_id: data.id,
           sender_name: currentUserName,
           receiver_name: otherUserName,
           content: data.content,
