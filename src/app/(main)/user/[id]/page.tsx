@@ -28,19 +28,26 @@ export default async function UserProfilePage({
   const isOwnProfile = user?.id === id;
   const isAdmin = ADMIN_EMAILS.includes(user?.email || "");
 
+  const postsQuery = supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      like_count:likes(count),
+      comment_count:comments(count)
+    `
+    )
+    .eq("author_id", id)
+    .order("created_at", { ascending: false });
+
+  // Only show approved posts unless viewing own profile or admin
+  if (!isOwnProfile && !isAdmin) {
+    postsQuery.eq("is_approved", true);
+  }
+
   const [{ data: profile }, { data: posts }, blockResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", id).single(),
-    supabase
-      .from("posts")
-      .select(
-        `
-        *,
-        like_count:likes(count),
-        comment_count:comments(count)
-      `
-      )
-      .eq("author_id", id)
-      .order("created_at", { ascending: false }),
+    postsQuery,
     user && !isOwnProfile
       ? supabase.from("blocks").select("id").eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle()
       : Promise.resolve({ data: null }),

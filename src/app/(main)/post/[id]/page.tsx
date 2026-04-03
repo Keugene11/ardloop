@@ -28,6 +28,11 @@ export default async function PostPage({
 
   if (!post) notFound();
 
+  const ADMIN_EMAILS = ["keugenelee11@gmail.com"];
+  const isAdmin = ADMIN_EMAILS.includes(user?.email || "");
+  // Unapproved posts are only visible to the author and admins
+  if (!post.is_approved && post.author_id !== user?.id && !isAdmin) notFound();
+
   const { data: comments } = await supabase
     .from("comments")
     .select("*, author:profiles(*)")

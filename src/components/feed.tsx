@@ -117,6 +117,7 @@ export function Feed({
         like_count: 0,
         comment_count: 0,
         impression_count: 0,
+        is_approved: false,
         user_has_liked: false,
         recent_comments: [],
       };

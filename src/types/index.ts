@@ -61,6 +61,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   impression_count: number;
+  is_approved: boolean;
   user_has_liked: boolean;
   recent_comments: Comment[];
 }

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, Trash2, Flag, Pencil, Check, X, Eye } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Flag, Pencil, Check, X, Eye, ShieldCheck, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post } from "@/types";
 import { timeAgo } from "@/lib/utils";
@@ -48,6 +48,8 @@ export function PostCard({
   const [editContent, setEditContent] = useState(post.content);
   const [displayContent, setDisplayContent] = useState(post.content);
   const [saving, setSaving] = useState(false);
+  const [approved, setApproved] = useState(post.is_approved !== false);
+  const [approving, setApproving] = useState(false);
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -170,6 +172,36 @@ export function PostCard({
             <span className="text-[12px] text-text-muted shrink-0">
               {timeAgo(post.created_at)}
             </span>
+            {!approved && userId === post.author_id && !isAdmin && (
+              <span className="flex items-center gap-1 text-[11px] text-amber-500 font-semibold shrink-0">
+                <Clock size={12} strokeWidth={2} />
+                Pending
+              </span>
+            )}
+            {!approved && isAdmin && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (approving) return;
+                  setApproving(true);
+                  const res = await fetch("/api/admin/approve-post", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ post_id: post.id }),
+                  });
+                  if (res.ok) {
+                    setApproved(true);
+                    router.refresh();
+                  }
+                  setApproving(false);
+                }}
+                disabled={approving}
+                className="flex items-center gap-1 text-[11px] text-green-600 font-semibold shrink-0 press"
+              >
+                <ShieldCheck size={12} strokeWidth={2} />
+                {approving ? "..." : "Approve"}
+              </button>
+            )}
           </div>
 
           {editing ? (

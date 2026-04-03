@@ -9,20 +9,34 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const ADMIN_EMAILS = ["keugenelee11@gmail.com"];
+  const isAdmin = ADMIN_EMAILS.includes(user?.email || "");
+
   // Run all independent queries in parallel
-  const [postsResult, userCountResult] = await Promise.all([
-    supabase
-      .from("posts")
-      .select(
-        `
-        *,
-        author:profiles(*),
-        like_count:likes(count),
-        comment_count:comments(count)
+  // Admins see all posts; regular users see approved posts + their own pending posts
+  const postsQuery = supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      author:profiles(*),
+      like_count:likes(count),
+      comment_count:comments(count)
 `
-      )
-      .order("created_at", { ascending: false })
-      .limit(50),
+    )
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (!isAdmin) {
+    if (user) {
+      postsQuery.or(`is_approved.eq.true,author_id.eq.${user.id}`);
+    } else {
+      postsQuery.eq("is_approved", true);
+    }
+  }
+
+  const [postsResult, userCountResult] = await Promise.all([
+    postsQuery,
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true }),
@@ -31,11 +45,9 @@ export default async function HomePage() {
   const posts = postsResult.data;
   const userCount = userCountResult.count;
 
-  const ADMIN_EMAILS = ["keugenelee11@gmail.com"];
   let likedPostIds = new Set<string>();
   let blockedUserIds = new Set<string>();
   let userProfile: { avatar_url: string | null; full_name: string } | null = null;
-  const isAdmin = ADMIN_EMAILS.includes(user?.email || "");
 
   if (user) {
     const [likesResult, blocksResult, profileResult] = await Promise.all([
