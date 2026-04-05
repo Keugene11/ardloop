@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export function AcceptTermsModal() {
   const [loading, setLoading] = useState(false);
@@ -9,11 +10,38 @@ export function AcceptTermsModal() {
   const handleAccept = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/accept-terms", { method: "POST" });
-      if (res.ok) {
-        setAccepted(true);
-        window.location.reload();
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      // Update directly via client-side Supabase (uses session from memory,
+      // not cookies — avoids WKWebView cookie issues on iPad/iOS native)
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          id: user.id,
+          email: user.email || "",
+          full_name:
+            user.user_metadata?.full_name || user.user_metadata?.name || "",
+          avatar_url: user.user_metadata?.avatar_url || null,
+          accepted_terms: true,
+        },
+        { onConflict: "id" }
+      );
+
+      if (error) {
+        // Fallback to server API route
+        const res = await fetch("/api/accept-terms", {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!res.ok) return;
       }
+
+      setAccepted(true);
+      window.location.reload();
     } finally {
       setLoading(false);
     }
